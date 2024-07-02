@@ -5,9 +5,11 @@ import ContentEditable from './ContentEditable';
 import { Version, KeywordTree } from '../types';
 import { useState } from 'react';
 import Anthropic from "@anthropic-ai/sdk";
+import axios from 'axios';
 
 const API_KEY = '';
-const anthropic = new Anthropic({ apiKey: '' });
+// const anthropic = new Anthropic({ apiKey: '' });
+const ngrok_url = 'https://18c7-35-237-116-20.ngrok-free.app'+'/api/message';
 
 interface DescriptionEditorProps {
   onApply: (description: string) => void;
@@ -93,63 +95,30 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
                      Return pieces from this description: : ${version?.description}
                     `;
     try {
-      // const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      //   method: "POST",
-      //   headers: {
-      //     "Authorization": `Bearer ${API_KEY}`,
-      //     "Content-Type": "application/json",
-      //   },
-      //   body: JSON.stringify({
-      //     model: "gpt-4-turbo",
-      //     messages: [{ role: "system", content: "You are a creative programmer." }, { role: "user", content: prompt }],
-      //   }),
-      // });
-      const response = await anthropic.messages.create({
-        model: "claude-3-opus-20240229",
-        max_tokens: 1000,
-        temperature: 0,
-        system: "Respond only with short poems.",
-        messages: [
-            {
-            "role": "user",
-            "content": [
-                {
-                "type": "text",
-                "text": prompt
-                }
-            ]
-            }
-        ]
-        });
-        const content = response.content[0];
-        if (content && Array.isArray(content)) {
-          const textResponse = content.map(item => item.text).join(' ');
-          console.log('response from handleParseDescription', textResponse);
-          const specificParamList = textResponse.split('///').map((param: string) => param.trim());
-          setVersions(prevVersions => {
-            const updatedVersions = prevVersions.map(version =>
-              version.id === versionId
-                ? { ...version, specificParamList }
-                : version
-            );
-            return updatedVersions;
-          });
-        }
-        // const content = response?.choices[0]?.message?.content;
-      // const data = await response.json();
-      // const content = data.choices[0]?.message?.content;
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "gpt-4-turbo",
+          messages: [{ role: "system", content: "You are a creative programmer." }, { role: "user", content: prompt }],
+        }),
+      });
+      const content = response?.choices[0]?.message?.content;
   
-      // if (content) {
-      //   const specificParamList = content.split('///').map((param: string) => param.trim());
-      //   setVersions(prevVersions => {
-      //     const updatedVersions = prevVersions.map(version =>
-      //       version.id === versionId
-      //         ? { ...version, specificParamList }
-      //         : version
-      //     );
-      //     return updatedVersions;
-      //   });
-      // }
+      if (content) {
+        const specificParamList = content.split('///').map((param: string) => param.trim());
+        setVersions(prevVersions => {
+          const updatedVersions = prevVersions.map(version =>
+            version.id === versionId
+              ? { ...version, specificParamList }
+              : version
+          );
+          return updatedVersions;
+        });
+      }
     } catch (error) {
       console.error("Error processing request:", error);
     } finally {
@@ -235,19 +204,19 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
     // } 
     console.log(prompt)
     try {
-          const response = await fetch('http://localhost:3000/api/message', {
+          const response = await axios.post(ngrok_url, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ prompt })
+            body: JSON.stringify({ prompt: prompt })
           });
       
-        const data = await response.json();
+        const data = await response.data;
         const content = data?.content;
         console.log('content from handleInitialize:', content);
-        if (content && Array.isArray(content)) {
-          const textResponse = content.map(item => item.text).join(' ');
+        if (content) {
+          const textResponse = content;
           console.log('Response from handleInitialize:', textResponse);
           const newCode = parseGPTResponse(textResponse);
           setVersions(prevVersions => {
@@ -287,24 +256,20 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
 `;
 
     try {
-      console.log('prompt eytan', newPrompt)
-      const response = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
+      const response = await axios.post(ngrok_url, {
+        method: 'POST',
         headers: {
-          "Authorization": `Bearer ${API_KEY}`,
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          model: "gpt-4-turbo",
-          messages: [{ role: "system", content: "You are a creative programmer." }, { role: "user", content: newPrompt }],
-        }),
+        body: JSON.stringify({ prompt: newPrompt })
       });
+  
+    const data = await response.data;
+    const content = data?.content;
+    console.log('content from handleSecondGPTcall:', content);
 
-      const data = await response.json();
-      const newDescriptionContent = data.choices[0]?.message?.content;
-
-      if (newDescriptionContent) {
-        const updatedDescription = newDescriptionContent.replace('] {', ']{');
+      if (content) {
+        const updatedDescription = content.replace('] {', ']{');
         setVersions(prevVersions => {
           const updatedVersions = prevVersions.map(version =>
             version.id === versionId
@@ -348,20 +313,31 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
     Include updated code and the explanation of what changed in the updated description, and why your change in the code can match this description change, and how your change didn't affect the existing code pieces or CSS Styles that remains the same according to description.\\
     Return response in this format: (Code:  \`\`\`html html code \`\`\`html, \`\`\`js javascript code, leave blank if none \`\`\`js, \`\`\`css css code, leave blank if none \`\`\`css; Explanation: explanation content)`;
     try {
-      const response = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "gpt-4-turbo",
-          messages: [{ role: "system", content: "You are a creative programmer." }, { role: "user", content: prompt }],
-        }),
-      });
+      // const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      //   method: "POST",
+      //   headers: {
+      //     "Authorization": `Bearer ${API_KEY}`,
+      //     "Content-Type": "application/json",
+      //   },
+      //   body: JSON.stringify({
+      //     model: "gpt-4-turbo",
+      //     messages: [{ role: "system", content: "You are a creative programmer." }, { role: "user", content: prompt }],
+      //   }),
+      // });
 
-      const data = await response.json();
-      const content = data.choices[0]?.message?.content;
+      // const data = await response.json();
+      // const content = data.choices[0]?.message?.content;
+      const response = await axios.post(ngrok_url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ prompt: prompt })
+      });
+  
+    const data = await response.data;
+    const content = data?.content;
+    console.log('content from handleupdatedescription:', content);
       if (content) {
         console.log('prompt for update description', prompt)
         console.log('response after update description', content)
@@ -401,23 +377,34 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
     Try to keep the updated description as close to the old description as possible, only change necessary parts to fit the code better.\\
     Include only the updated description in the response.`;
     try {
-      const response = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
+      // const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      //   method: "POST",
+      //   headers: {
+      //     "Authorization": `Bearer ${API_KEY}`,
+      //     "Content-Type": "application/json",
+      //   },
+      //   body: JSON.stringify({
+      //     model: "gpt-4-turbo",
+      //     messages: [{ role: "system", content: "You are a creative programmer." }, { role: "user", content: newPrompt }],
+      //   }),
+      // });
+
+      // const data = await response.json();
+      // const newDescriptionContent = data.choices[0]?.message?.content;
+      const response = await axios.post(ngrok_url, {
+        method: 'POST',
         headers: {
-          "Authorization": `Bearer ${API_KEY}`,
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          model: "gpt-4-turbo",
-          messages: [{ role: "system", content: "You are a creative programmer." }, { role: "user", content: newPrompt }],
-        }),
+        body: JSON.stringify({ prompt: newPrompt })
       });
+  
+    const data = await response.data;
+    const content = data?.content;
+    console.log('content from gotcallafterupdatedescription:', content);
 
-      const data = await response.json();
-      const newDescriptionContent = data.choices[0]?.message?.content;
-
-      if (newDescriptionContent) {
-        const updatedDescription = newDescriptionContent.replace('] {', ']{');
+      if (content) {
+        const updatedDescription = content.replace('] {', ']{');
         setVersions(prevVersions => {
           const updatedVersions = prevVersions.map(version =>
             version.id === versionId

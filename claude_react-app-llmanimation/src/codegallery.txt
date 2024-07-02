@@ -429,3 +429,109 @@ A [white rabbit] {composed of a round body and head, with additional details suc
 </body>
 </html>
 
+[Trees] {three tree trunk elements, #tree1, #tree2, and #tree3, represented by SVG paths} and [buildings] [growing] {trees' growth animated by trunks growing tall and branches sprouting and expanding, buildings' growth animated by increasing height and decreasing y position} [taller] {trees grow to different heights (40px, 50px, and 60px), buildings grow to 60px and 80px respectively} together on a [hill] {represented by a curved SVG path with green fill} against a [sky] {represented by the light blue background color #87CEEB} backdrop. The [animation] {created using the Anime.js library, with easing functions and delays for smooth, sequential growth, including a loop for buildings and three-stage growth for trees} creates a dynamic scene of nature and urban development.
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Growing Trees and Buildings</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      background-color: #87CEEB;
+    }
+    svg {
+      width: 100vmin;
+      height: 100vmin;
+    }
+  </style>
+</head>
+<body>
+  <svg viewBox="0 0 200 200">
+    <!-- Hill -->
+    <path id="hill" d="M0,200 Q100,100 200,200" fill="#4CAF50"/>
+    
+    <!-- Trees -->
+    <path id="tree1" d="M50,200 L50,200" fill="none" stroke="#8B4513" stroke-width="2"/>
+    <path id="tree2" d="M80,200 L80,200" fill="none" stroke="#8B4513" stroke-width="2"/>
+    <path id="tree3" d="M110,200 L110,200" fill="none" stroke="#8B4513" stroke-width="2"/>
+    
+    <!-- Buildings -->
+    <rect id="building1" x="130" y="200" width="20" height="0" fill="#808080"/>
+    <rect id="building2" x="160" y="200" width="20" height="0" fill="#808080"/>
+  </svg>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+  <script>
+    function createTreePath(x, height) {
+      return `M${x},200 L${x},${200-height}`;
+    }
+
+    function createBranchPath(x, height, branchHeight, size) {
+      return `M${x-size},${200-branchHeight} L${x},${200-branchHeight-size*3} L${x+size},${200-branchHeight}`;
+    }
+
+    anime({
+      targets: ['#tree1', '#tree2', '#tree3'],
+      d: function(el, i) {
+        return createTreePath(50 + i * 30, 40 + i * 10);
+      },
+      easing: 'easeInOutSine',
+      duration: 2000,
+      delay: function(el, i) { return i * 250 },
+      complete: function(anim) {
+        anime({
+          targets: ['#tree1', '#tree2', '#tree3'],
+          d: function(el, i) {
+            const height = 40 + i * 10;
+            return createTreePath(50 + i * 30, height) + ' ' +
+                   createBranchPath(50 + i * 30, height, height * 0.7, 0) + ' ' +
+                   createBranchPath(50 + i * 30, height, height * 0.4, 0) + ' ' +
+                   createBranchPath(50 + i * 30, height, height * 0.1, 0);
+          },
+          easing: 'easeOutQuad',
+          duration: 1000,
+          delay: function(el, i) { return i * 250 },
+          complete: function(anim) {
+            anime({
+              targets: ['#tree1', '#tree2', '#tree3'],
+              d: function(el, i) {
+                const height = 40 + i * 10;
+                return createTreePath(50 + i * 30, height) + ' ' +
+                       createBranchPath(50 + i * 30, height, height * 0.7, 5) + ' ' +
+                       createBranchPath(50 + i * 30, height, height * 0.4, 5) + ' ' +
+                       createBranchPath(50 + i * 30, height, height * 0.1, 5);
+              },
+              easing: 'easeOutElastic(1, .8)',
+              duration: 1500,
+              delay: function(el, i) { return i * 250 }
+            });
+          }
+        });
+      }
+    });
+
+    anime({
+      targets: ['#building1', '#building2'],
+      height: function(el, i) { return [0, 60 + i * 20]; },
+      y: function(el, i) { return [200, 140 - i * 20]; },
+      easing: 'easeInOutQuad',
+      duration: 2000,
+      delay: function(el, i) { return 1000 + i * 250 },
+      loop: true
+    });
+  </script>
+</body>
+</html>
+
+
+
