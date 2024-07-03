@@ -7,9 +7,14 @@ import { useState } from 'react';
 import Anthropic from "@anthropic-ai/sdk";
 import axios from 'axios';
 
+
 const API_KEY = '';
 // const anthropic = new Anthropic({ apiKey: '' });
-const ngrok_url = 'https://18c7-35-237-116-20.ngrok-free.app'+'/api/message';
+
+const ngrok_url = 'https://14a7-104-199-195-83.ngrok-free.app';
+const ngrok_url_sonnet = ngrok_url+'/api/message';
+const ngrok_url_haiku = ngrok_url+'/api/message-haiku';
+
 
 interface DescriptionEditorProps {
   onApply: (description: string) => void;
@@ -95,18 +100,29 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
                      Return pieces from this description: : ${version?.description}
                     `;
     try {
-      const response = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
+      // const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      //   method: "POST",
+      //   headers: {
+      //     "Authorization": `Bearer ${API_KEY}`,
+      //     "Content-Type": "application/json",
+      //   },
+      //   body: JSON.stringify({
+      //     model: "gpt-4-turbo",
+      //     messages: [{ role: "system", content: "You are a creative programmer." }, { role: "user", content: prompt }],
+      //   }),
+      // });
+      // const content = response?.choices[0]?.message?.content;
+      const response = await axios.post(ngrok_url_sonnet, {
+        method: 'POST',
         headers: {
-          "Authorization": `Bearer ${API_KEY}`,
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          model: "gpt-4-turbo",
-          messages: [{ role: "system", content: "You are a creative programmer." }, { role: "user", content: prompt }],
-        }),
+        body: JSON.stringify({ prompt: prompt })
       });
-      const content = response?.choices[0]?.message?.content;
+  
+      const data = await response.data;
+      const content = data?.content;
+      console.log('content from Parsedescription:', content);
   
       if (content) {
         const specificParamList = content.split('///').map((param: string) => param.trim());
@@ -204,7 +220,7 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
     // } 
     console.log(prompt)
     try {
-          const response = await axios.post(ngrok_url, {
+          const response = await axios.post(ngrok_url_sonnet, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
@@ -256,7 +272,7 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
 `;
 
     try {
-      const response = await axios.post(ngrok_url, {
+      const response = await axios.post(ngrok_url_sonnet, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -327,7 +343,7 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
 
       // const data = await response.json();
       // const content = data.choices[0]?.message?.content;
-      const response = await axios.post(ngrok_url, {
+      const response = await axios.post(ngrok_url_sonnet, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -391,7 +407,7 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
 
       // const data = await response.json();
       // const newDescriptionContent = data.choices[0]?.message?.content;
-      const response = await axios.post(ngrok_url, {
+      const response = await axios.post(ngrok_url_sonnet, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -457,26 +473,38 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
 
       Extend this prompt: ${version?.description}`;
 
-      const response = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
+      // const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      //   method: "POST",
+      //   headers: {
+      //     "Authorization": `Bearer ${API_KEY}`,
+      //     "Content-Type": "application/json",
+      //   },
+      //   body: JSON.stringify({
+      //     model: "gpt-3.5-turbo",
+      //     messages: [
+      //       { role: "system", content: "You are a creative programmer." },
+      //       { role: "user", content: prompt },
+      //     ],
+      //   }),
+      // });
+
+      // const data = await response.json();
+      // const newDescriptionContent = data.choices[0]?.message?.content;
+
+      const response = await axios.post(ngrok_url_haiku, {
+        method: 'POST',
         headers: {
-          "Authorization": `Bearer ${API_KEY}`,
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          model: "gpt-3.5-turbo",
-          messages: [
-            { role: "system", content: "You are a creative programmer." },
-            { role: "user", content: prompt },
-          ],
-        }),
+        body: JSON.stringify({ prompt: prompt })
       });
+  
+      const data = await response.data;
+      const content = data?.content;
+      console.log('content from handleExtend:', content);
 
-      const data = await response.json();
-      const newDescriptionContent = data.choices[0]?.message?.content;
-
-      if (newDescriptionContent) {
-        const newDescriptions = newDescriptionContent.split('///');
+      if (content) {
+        const newDescriptions = content.split('///');
         setVersions(prevVersions => {
           const updatedVersions = [...prevVersions];
           newDescriptions.forEach((desc: string, index: number) => {

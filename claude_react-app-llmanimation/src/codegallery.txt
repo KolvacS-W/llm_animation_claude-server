@@ -533,5 +533,81 @@ A [white rabbit] {composed of a round body and head, with additional details suc
 </body>
 </html>
 
+[Flower] {SVG element composed of stem, leaves, center, and petals} with [colorful] {red, pink, purple, and orange} [petals] {4 petal paths with curved shapes, initially transparent and gradually filled with semi-transparent colors} and [green] {stroke color set to green} [leaves] {2 leaf paths with curved shapes, initially transparent and gradually filled with semi-transparent green} [appearing] {animated using anime.js library with staggered delays} and [growing] {stem extends from bottom, leaves and petals appear with stroke animations, center circle grows from 0 to 10px radius} [big] {final size determined by SVG viewBox of 200x200} from a [stem] {line element with green stroke, animates from bottom to top} .
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Growing Flower Animation</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      background-color: #87CEEB;
+    }
+    svg {
+      width: 100vmin;
+      height: 100vmin;
+    }
+  </style>
+</head>
+<body>
+  <svg viewBox="0 0 200 200">
+    <line id="stem" x1="100" y1="200" x2="100" y2="200" stroke="green" stroke-width="4"/>
+    <path id="leaf1" d="M100,150 Q80,130 100,110" fill="transparent" stroke="green" stroke-width="2"/>
+    <path id="leaf2" d="M100,130 Q120,110 100,90" fill="transparent" stroke="green" stroke-width="2"/>
+    <circle id="center" cx="100" cy="70" r="0" fill="yellow"/>
+    <path id="petal1" d="M100,70 Q85,55 100,40" fill="transparent" stroke="red" stroke-width="2"/>
+    <path id="petal2" d="M100,70 Q115,55 100,40" fill="transparent" stroke="pink" stroke-width="2"/>
+    <path id="petal3" d="M100,70 Q85,85 100,100" fill="transparent" stroke="purple" stroke-width="2"/>
+    <path id="petal4" d="M100,70 Q115,85 100,100" fill="transparent" stroke="orange" stroke-width="2"/>
+  </svg>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+  <script>
+    anime({
+      targets: '#stem',
+      y2: 100,
+      duration: 2000,
+      easing: 'easeOutQuad'
+    });
+
+    anime({
+      targets: ['#leaf1', '#leaf2'],
+      strokeDashoffset: [anime.setDashoffset, 0],
+      easing: 'easeInOutSine',
+      duration: 1500,
+      delay: 1000,
+      fill: 'rgba(0, 128, 0, 0.7)'
+    });
+
+    anime({
+      targets: '#center',
+      r: 10,
+      duration: 1000,
+      delay: 2000,
+      easing: 'easeOutElastic(1, .8)'
+    });
+
+    anime({
+      targets: ['#petal1', '#petal2', '#petal3', '#petal4'],
+      strokeDashoffset: [anime.setDashoffset, 0],
+      easing: 'easeInOutQuad',
+      duration: 1500,
+      delay: anime.stagger(200, {start: 2500}),
+      fill: function(el, i) {
+        return ['rgba(255, 0, 0, 0.7)', 'rgba(255, 192, 203, 0.7)', 'rgba(128, 0, 128, 0.7)', 'rgba(255, 165, 0, 0.7)'][i];
+      }
+    });
+  </script>
+</body>
+</html>
 

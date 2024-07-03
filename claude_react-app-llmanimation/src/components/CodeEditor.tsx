@@ -4,7 +4,7 @@ import ReactLoading from 'react-loading';
 import rehypePrism from 'rehype-prism-plus';
 import rehypeRewrite from 'rehype-rewrite';
 import { Version, KeywordTree, KeywordNode } from '../types';
-
+import axios from 'axios';
 //how code highlight work:
 // whenever the description is updated, the corresponding keyword tree will be updated for this version, to capture all the keywords
 // when we click parse or update a code, processKeywordTree() will be called
@@ -27,6 +27,9 @@ interface CodeEditorProps {
 }
 
 const API_KEY = '';
+const ngrok_url = 'https://14a7-104-199-195-83.ngrok-free.app';
+const ngrok_url_sonnet = ngrok_url+'/api/message';
+const ngrok_url_haiku = ngrok_url+'/api/message-haiku';
 
 const CustomCodeEditor: React.FC<CodeEditorProps> = ({
   code,
@@ -282,21 +285,32 @@ const CustomCodeEditor: React.FC<CodeEditorProps> = ({
     `;
 
     try {
-      const response = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "gpt-4-turbo",
-          messages: [{ role: "system", content: "You are a creative programmer." }, { role: "user", content: prompt }],
-        }),
-      });
+      // const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      //   method: "POST",
+      //   headers: {
+      //     "Authorization": `Bearer ${API_KEY}`,
+      //     "Content-Type": "application/json",
+      //   },
+      //   body: JSON.stringify({
+      //     model: "gpt-4-turbo",
+      //     messages: [{ role: "system", content: "You are a creative programmer." }, { role: "user", content: prompt }],
+      //   }),
+      // });
 
-      const data = await response.json();
-      const gptResponse = data.choices[0]?.message?.content;
-      return gptResponse;
+      // const data = await response.json();
+      // const gptResponse = data.choices[0]?.message?.content;
+      const response = await axios.post(ngrok_url_sonnet, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ prompt: prompt })
+      });
+  
+      const data = await response.data;
+      const content = data?.content;
+      console.log('content from Parsecode:', content);
+      return content;
     } catch (error) {
       console.error("Error processing GPT request:", error);
       return '';
@@ -347,25 +361,36 @@ const CustomCodeEditor: React.FC<CodeEditorProps> = ({
     Include only the updated description in the response.`;
 
     try {
-      const response = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "gpt-4-turbo",
-          messages: [{ role: "system", content: "You are a creative programmer." }, { role: "user", content: prompt }],
-        }),
+      // const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      //   method: "POST",
+      //   headers: {
+      //     "Authorization": `Bearer ${API_KEY}`,
+      //     "Content-Type": "application/json",
+      //   },
+      //   body: JSON.stringify({
+      //     model: "gpt-4-turbo",
+      //     messages: [{ role: "system", content: "You are a creative programmer." }, { role: "user", content: prompt }],
+      //   }),
         
+      // });
+
+      // const data = await response.json();
+      // const newDescriptionContent = data.choices[0]?.message?.content;
+      // console.log('prompt for update code:', prompt)
+      const response = await axios.post(ngrok_url_sonnet, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ prompt: prompt })
       });
+  
+      const data = await response.data;
+      const content = data?.content;
+      console.log('content from updatecode:', content);
 
-      const data = await response.json();
-      const newDescriptionContent = data.choices[0]?.message?.content;
-      console.log('prompt for update code:', prompt)
-
-      if (newDescriptionContent) {
-        const updatedDescription = newDescriptionContent.replace('] {', ']{');
+      if (content) {
+        const updatedDescription = content.replace('] {', ']{');
         setVersions((prevVersions) => {
           const updatedVersions = prevVersions.map(version => 
             version.id === versionId 
