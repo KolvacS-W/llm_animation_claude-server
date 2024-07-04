@@ -27,7 +27,7 @@ interface CodeEditorProps {
 }
 
 const API_KEY = '';
-const ngrok_url = 'https://c7c8-34-81-36-117.ngrok-free.app';
+const ngrok_url = 'https://6f12-34-138-67-51.ngrok-free.app';
 const ngrok_url_sonnet = ngrok_url+'/api/message';
 const ngrok_url_haiku = ngrok_url+'/api/message-haiku';
 
@@ -391,7 +391,7 @@ const CustomCodeEditor: React.FC<CodeEditorProps> = ({
       console.log('content from updatecode:', content);
 
       if (content) {
-        const updatedDescription = content.replace('] {', ']{');
+        const updatedDescription = content.replace('] {', ']{').replace(']\n{', ']{');
         setVersions((prevVersions) => {
           const updatedVersions = prevVersions.map(version => 
             version.id === versionId 

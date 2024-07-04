@@ -134,7 +134,7 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
       const newDescriptionContent = data.choices[0]?.message?.content;
 
       if (newDescriptionContent) {
-        const updatedDescription = newDescriptionContent.replace('] {', ']{');
+        const updatedDescription = newDescriptionContent.replace('] {', ']{').replace(']\n{', ']{');
         setVersions((prevVersions) => {
           const updatedVersions = prevVersions.map(version => 
             version.id === versionId 
@@ -245,7 +245,7 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
       const newDescriptionContent = data.choices[0]?.message?.content;
 
       if (newDescriptionContent) {
-        const updatedDescription = newDescriptionContent.replace('] {', ']{');
+        const updatedDescription = newDescriptionContent.replace('] {', ']{').replace(']\n{', ']{');
         setVersions((prevVersions) => {
           const updatedVersions = prevVersions.map(version => 
             version.id === versionId 
@@ -376,7 +376,7 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
 
   const toggleDetails = (word: string) => {
     setShowDetails(prev => ({ ...prev, [word]: !prev[word] }));
-    setDescription(latestDescriptionText.replace('] {', ']{'));
+    setDescription(latestDescriptionText.replace('] {', ']{').replace(']\n{', ']{'));
   };
 
   const handleTextChange = (html: string) => {
@@ -402,10 +402,10 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
       .join('')
       .replace(/\s+/g, ' ') // Replace multiple spaces with a single space
       .replace('\n', ' ')
-      .replace('] {', ']{') // Replace '] {' with ']{'
+      .replace('] {', ']{').replace(']\n{', ']{') // Replace '] {' with ']{'
       .trim(); // Trim any leading or trailing whitespace
 
-    setlatestDescriptionText(text.replace('] {', ']{')); // Save the newest text
+    setlatestDescriptionText(text.replace('] {', ']{').replace(']\n{', ']{')); // Save the newest text
   };
 
   const handleTabPress = (value: string) => {
@@ -431,11 +431,11 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
       .join('')
       .replace(/\s+/g, ' ') // Replace multiple spaces with a single space
       .replace('\n', ' ')
-      .replace('] {', ']{') // Replace '] {' with ']{'
+      .replace('] {', ']{').replace(']\n{', ']{') // Replace '] {' with ']{'
       .trim(); // Trim any leading or trailing whitespace
 
-    setDescription(text.replace('] {', ']{'));
-    onApply(text.replace('] {', ']{'));
+    setDescription(text.replace('] {', ']{').replace(']\n{', ']{'));
+    onApply(text.replace('] {', ']{').replace(']\n{', ']{'));
     console.log('tab press, save desc', description)
   };
 

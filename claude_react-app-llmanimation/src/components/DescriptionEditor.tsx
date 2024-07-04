@@ -11,7 +11,7 @@ import axios from 'axios';
 const API_KEY = '??';
 // const anthropic = new Anthropic({ apiKey: '' });
 
-const ngrok_url = 'https://c7c8-34-81-36-117.ngrok-free.app';
+const ngrok_url = 'https://6f12-34-138-67-51.ngrok-free.app';
 const ngrok_url_sonnet = ngrok_url+'/api/message';
 const ngrok_url_haiku = ngrok_url+'/api/message-haiku';
 
@@ -157,7 +157,7 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
         version.id === currentVersionId
           ? {
               ...version,
-              description: updatedDescription,
+              description: updatedDescription.replace('] {', ']{').replace(']\n{', ']{'),
               specificParamList: version.specificParamList.filter(param => param !== text)
             }
           : version
@@ -183,12 +183,83 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
 
     const prompt = `Create an animation using anime.js based on the given instruction. 
     Make the result animation on a square page that can fit and center on any page.
-    Use svg shapes or customized polygon by defining points to create objects, and use svg path to create routes for position movement of objects.
-
+    Use svg shapes or customized polygons by defining points to create objects, and use svg path to create routes for the position movement of objects.
     Don't use any external elements like images or svg, create everything with code.\\
     Make sure to implement as many details from the description as possible. e.g., include elements (e.g., eyes, windows) of objects (e.g., fish, house), the features (e.g., shape, color) and the changes (e.g., movement, size, color)).
     Donnot move the position of objects if there's no required position movement in instruction (e.g., growing big/tall and rotating should not involve position movement), and use transform-origin to prevent unexpected position change caused by animation.
-    Try to include css and javascript code in html like the code snippet.
+    you can refer to the following code snippet for: Apples growing on a tree on a hill
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Apples Growing on a Tree</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+        <style>
+            body, html {
+                margin: 0;
+                padding: 0;
+                width: 100%;
+                height: 100%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                background-color: #87CEEB;
+            }
+            #animation-container {
+                width: 400px;
+                height: 400px;
+                position: relative;
+                overflow: hidden;
+            }
+            .hill {
+                fill: #4CAF50;
+            }
+            .tree-trunk {
+                fill: #8B4513;
+            }
+            .tree-leaves {
+                fill: #228B22;
+            }
+            .apple {
+                fill: #FF0000;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="animation-container">
+            <svg width="100%" height="100%" viewBox="0 0 400 400">
+                <path class="hill" d="M0 400 Q200 200 400 400 Z" />
+                <rect class="tree-trunk" x="180" y="200" width="40" height="150" />
+                <path class="tree-leaves" d="M200 50 Q130 120 100 200 Q200 150 300 200 Q270 120 200 50 Z" />
+                <circle class="apple" cx="150" cy="150" r="0" />
+                <circle class="apple" cx="250" cy="150" r="0" />
+                <circle class="apple" cx="180" cy="220" r="0" />
+                <circle class="apple" cx="220" cy="220" r="0" />
+            </svg>
+        </div>
+
+        <script>
+            anime({
+                targets: '.tree-leaves',
+                scale: [1, 1.05, 1],
+                duration: 3000,
+                easing: 'easeInOutQuad',
+                loop: true
+            });
+
+            anime({
+                targets: '.apple',
+                r: 15,
+                duration: 3000,
+                delay: anime.stagger(500),
+                easing: 'easeOutElastic(1, .5)'
+            });
+        </script>
+    </body>
+    </html>
+
+    Try to include css and javascript code in html.
     Return response in this format: (Code:  \`\`\`html html code \`\`\`html, \`\`\`js javascript code, leave blank if none \`\`\`js, \`\`\`css css code, leave blank if none \`\`\`css; Explanation: explanations of the code). Instruction: ${version?.description}`;
     
     // Without instruction, all the animated objects should follow the center of the object during animation.
@@ -287,7 +358,7 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
     console.log('content from handleSecondGPTcall:', content);
 
       if (content) {
-        const updatedDescription = content.replace('] {', ']{');
+        const updatedDescription = content.replace('] {', ']{').replace(']\n{', ']{');
         setVersions(prevVersions => {
           const updatedVersions = prevVersions.map(version =>
             version.id === versionId
@@ -423,7 +494,7 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
     console.log('content from gotcallafterupdatedescription:', content);
 
       if (content) {
-        const updatedDescription = content.replace('] {', ']{');
+        const updatedDescription = content.replace('] {', ']{').replace(']\n{', ']{');
         setVersions(prevVersions => {
           const updatedVersions = prevVersions.map(version =>
             version.id === versionId
@@ -460,7 +531,7 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
       Extend the original prompt, to make it more expressive with more details that suit the prompt description and also give clearer instructions as to what the animation code should be (e.g., tell in detail elements (e.g., eyes, windows) of objects (e.g., fish, house), the features (e.g., shape, color) and the changes (e.g., movement, size, color) as well as how they are made in animation code).
       Just add details and descriptions without changing the sentence structure.\\
       return 4 extended prompts in the response (divided by ///), and only return these extended. prompts in the response.
-      Make the extended prompt simple and precise, just describe the necessary details. Do not add too many subjective modifiers and contents irrelevant to the original prompt.
+      Make the extended prompt as simple as possible. Do not add too many subjective modifiers and contents irrelevant to the original prompt.
       Example:
       Original prompt:
       A fish swimming in the ocean
@@ -570,7 +641,7 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
           ? {
               ...version,
               showDetails: { ...version.showDetails, [word]: !version.showDetails[word] },
-              description: version.latestDescriptionText.replace('] {', ']{'),
+              description: version.latestDescriptionText.replace('] {', ']{').replace(']\n{', ']{'),
             }
           : version
       );
@@ -602,7 +673,7 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
       .join('')
       .replace(/\s+/g, ' ')
       .replace('\n', ' ')
-      .replace('] {', ']{')
+      .replace('] {', ']{').replace(']\n{', ']{')
       .trim();
   
     setVersions(prevVersions => {
@@ -610,7 +681,7 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
         version.id === currentVersionId
           ? {
               ...version,
-              latestDescriptionText: text.replace('] {', ']{'),
+              latestDescriptionText: text.replace('] {', ']{').replace(']\n{', ']{'),
             }
           : version
       );
@@ -642,7 +713,7 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
       .join('')
       .replace(/\s+/g, ' ')
       .replace('\n', ' ')
-      .replace('] {', ']{')
+      .replace('] {', ']{').replace(']\n{', ']{')
       .trim();
   
     setVersions(prevVersions => {
@@ -650,13 +721,13 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
         version.id === currentVersionId
           ? {
               ...version,
-              description: text.replace('] {', ']{'),
+              description: text.replace('] {', ']{').replace(']\n{', ']{'),
             }
           : version
       );
       return updatedVersions;
     });
-    onApply(text.replace('] {', ']{'));
+    onApply(text.replace('] {', ']{').replace(']\n{', ']{'));
   };
   
   const handleDoubleClick = (word: string) => {
@@ -712,7 +783,7 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
           setVersions(prevVersions => {
             const updatedVersions = prevVersions.map(version =>
               version.id === currentVersionId
-                ? { ...version, description: e.target.value }
+                ? { ...version, description: e.target.value.replace('] {', ']{').replace(']\n{', ']{') }
                 : version
             );
             return updatedVersions;

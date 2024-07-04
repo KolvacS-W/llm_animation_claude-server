@@ -351,7 +351,6 @@ const App: React.FC = () => {
     const newId = `${currentVersion.id}-test`;
     const prefix = 'In the description, words in [] are important entities, and following entities are detailed hints in {} to specify how to create these entities and animations. '
     const newVersion: Version = {
-      ...currentVersion,
       id: newId,
       description: prefix +currentVersion.description
     };
