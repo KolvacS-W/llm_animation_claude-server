@@ -8,10 +8,10 @@ import Anthropic from "@anthropic-ai/sdk";
 import axios from 'axios';
 
 
-const API_KEY = '';
+const API_KEY = '??';
 // const anthropic = new Anthropic({ apiKey: '' });
 
-const ngrok_url = 'https://14a7-104-199-195-83.ngrok-free.app';
+const ngrok_url = 'https://c7c8-34-81-36-117.ngrok-free.app';
 const ngrok_url_sonnet = ngrok_url+'/api/message';
 const ngrok_url_haiku = ngrok_url+'/api/message-haiku';
 
@@ -79,7 +79,7 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
       return updatedVersions;
     });
   
-    const prompt = `Find the text pieces that is about specific code details (e.g, variable name, parameters, size, number, path, coordinates) from the given description of an animation program made by anime.js.
+    const prompt = `Find the text pieces that are about specific code details (e.g., variable name, parameters, size, number, path, coordinates) from the given description of an animation program made by anime.js.
                     and return a list of the found text pieces. make sure the returned text pieces are exactly from the description. Splift the text pieces with ///.
                     Example description:
                     A [cottage] {rect element with x: 50, y: 80, width: 100, height: 60, filled in white} perched on 
@@ -97,8 +97,7 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
                      ///
                      fill="#87CEEB"
                     
-                     Return pieces from this description: : ${version?.description}
-                    `;
+                     Return pieces from this description: : ${version?.description}`;
     try {
       // const response = await fetch("https://api.openai.com/v1/chat/completions", {
       //   method: "POST",
@@ -182,14 +181,17 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
       return updatedVersions;
     });
 
-    const prompt = `Create an animation using anime.js based on the given instruction. Make the result animation on a square page that can fit and center on any pages. Use customizable svg paths for object movement. You can refer to this code snippet to see example methods and code formats but need to create different code:\\
-    Code snippet:\\
-    <!DOCTYPE html>\\<html lang="en">\\  <head>\\    <style>\\      html, body {\\        margin: 0;\\        padding: 0;\\        width: 100%;\\        height: 100%;\\        display: flex;\\        justify-content: center;\\        align-items: center;\\        overflow: hidden;\\      }\\      svg {\\        width: 100vmin;\\        height: 100vmin;\\      }\\    </style>\\  </head>\\  <body>\\    <svg viewBox="0 0 200 200">\\      <path id="path1" d="M10,10 Q90,90 180,10" fill="transparent" stroke="black"/>\\      <path id="path2" d="M10,190 Q90,110 180,190" fill="transparent" stroke="black"/>\\      <circle id="ball1" cx="0" cy="0" r="5" fill="red"/>\\      <circle id="ball2" cx="0" cy="0" r="5" fill="blue"/>\\    </svg>\\    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>\\    <script>\\      anime({\\        targets: \'#ball1\',\\        translateX: anime.path(\'#path1\')(\'x\'),\\        translateY: anime.path(\'#path1\')(\'y\'),\\        easing: \'easeInOutQuad\',\\        duration: 2000,\\        loop: true,\\        direction: \'alternate\'\\      });\\      anime({\\        targets: \'#ball2\',\\        translateX: anime.path(\'#path2\')(\'x\'),\\        translateY: anime.path(\'#path2\')(\'y\'),\\        easing: \'easeInOutQuad\',\\        duration: 2000,\\        loop: true,\\        direction: \'alternate\'\\      });\\    </script>\\  </body>\\</html>\\ 
-    Donnot use any external elements like images or svg, create everything with code.\\
-    Make sure to implement as much details from the description as possible. e.g., include elements (e.g., eyes, windows) of objects (e.g., fish, house), the features (e.g., shape, color) and the changes (e.g., movement, size, color)).
+    const prompt = `Create an animation using anime.js based on the given instruction. 
+    Make the result animation on a square page that can fit and center on any page.
+    Use svg shapes or customized polygon by defining points to create objects, and use svg path to create routes for position movement of objects.
+
+    Don't use any external elements like images or svg, create everything with code.\\
+    Make sure to implement as many details from the description as possible. e.g., include elements (e.g., eyes, windows) of objects (e.g., fish, house), the features (e.g., shape, color) and the changes (e.g., movement, size, color)).
+    Donnot move the position of objects if there's no required position movement in instruction (e.g., growing big/tall and rotating should not involve position movement), and use transform-origin to prevent unexpected position change caused by animation.
     Try to include css and javascript code in html like the code snippet.
     Return response in this format: (Code:  \`\`\`html html code \`\`\`html, \`\`\`js javascript code, leave blank if none \`\`\`js, \`\`\`css css code, leave blank if none \`\`\`css; Explanation: explanations of the code). Instruction: ${version?.description}`;
-
+    
+    // Without instruction, all the animated objects should follow the center of the object during animation.
     //   const response = await fetch("https://api.openai.com/v1/chat/completions", {
     //     method: "POST",
     //     headers: {
@@ -262,14 +264,14 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
   };
 
   const handleSecondGPTCall = async (newCode: { html: string; css: string; js: string }, existingDescription: string, versionId: string) => {
-    const newPrompt = `Based on the following code and description, provide an updated description. Code: HTML: \`\`\`html${newCode.html}\`\`\` CSS: \`\`\`css${newCode.css}\`\`\` JS: \`\`\`js${newCode.js}\`\`\` Description: ${existingDescription}. create the updated description by 1): finding important entities in the old description (for example, 'planet', 'shape', 'color', 'move' are all entity) and inserting [] around them 2): insert a detail wrapped in {} behind each entity according to the code (for example, add number of planets and each planet's dom element type, class, style features and name to entity 'planet').\\
+    const newPrompt = `Based on the following code and description, provide an updated description. Code: HTML: \`\`\`html${newCode.html}\`\`\` CSS: \`\`\`css${newCode.css}\`\`\` JS: \`\`\`js${newCode.js}\`\`\` Description: ${existingDescription}. create the updated description by 1): finding important entities in the old description (for example, 'planet', 'shape', 'color', and 'move' are all entities) and inserting [] around them 2): inserting a detail wrapped in {} behind each entity according to the code (add all the details about the entity in the code, including all the variable names, numbers and parameters. For example, add the number of planets and each planet's dom element type, class, style features, and name to entity 'planet').\\
     New description format:\\
     xxxxx[entity1]{detail for entity1}xxxx[entity2]{detail for entity2}... \\ 
-    Important: The entities must be within the old description already instead of being newly created. Find as much entities in the old description as possible. Each entity and each detail are wrapped in a [] and {} respectively. Other than the two symbols ([], {}) and added details, the updated description should be exactly same as old description. Include nothing but the new description in the response.\\
-    Example old description: Polygons moving and growing
-    Example output updated description:
-    [polygons]{two different polygon elements, polygon1 and polygon2 colored red and blue respectively, each defined by three points to form a triangle shape} [moving]{motion defined along path1-transparent fill and black stroke, and path2 -transparent fill and black stroke} and [growing]{size oscillates between 1 and 2 over a duration of 2000ms with easing}
-`;
+    Important: The entities must be within the old description already instead of being newly created. Find as many entities in the old description as possible. Each entity and each detail are wrapped in a [] and {} respectively. Other than the two symbols ([], {}) and added details, the updated description should be exactly the same as the old description. Include nothing but the new description in the response.\\
+    Example: 
+    old description: Polygons moving and growing
+    output updated description:
+    [polygons]{two different polygon elements, polygon1 and polygon2 colored red and blue respectively, each defined by three points to form a triangle shape} [moving]{motion defined along path1-transparent fill and black stroke, and path2 -transparent fill and black stroke} and [growing]{size oscillates between 1 and 2 over a duration of 2000ms with easing}`;
 
     try {
       const response = await axios.post(ngrok_url_sonnet, {
@@ -320,15 +322,15 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
     Old code: HTML: \`\`\`html${savedOldCode.html}\`\`\` CSS: \`\`\`css${savedOldCode.css}\`\`\` JS: \`\`\`js${savedOldCode.js}\`\`\` \\
     Old Description: ${versions.find(version => version.id === versionId)?.savedOldDescription}. \\
     New description: ${version?.description}. \\
-    In the description, words in [] are important entities that must be created by code, and following entities are detailed hints in {} to specify how to create these entities and animations with code.
-    Still use anime.js and use customizable svg paths for object movement. You can refer to old code to see example methods and code formats and refine it according to the new description.\\
-    Donnot use any external elements like images or svg, create everything with code.\\
+    In the description, words in [] are important entities that must be created by code, and the following entities are detailed hints in {} to specify how to create these entities and animations with code by specifying.
+    Still, use anime.js and use customizable svg paths for object movement. You can refer to the old code to see example methods and code formats and refine it according to the new description.\\
+    Don't use any external elements like images or svg, create everything with code.\\
     Try to include css and javascript code in html like the old code.\\
-    Make sure to modify as little code as possible, keep as much original objects and structure as possible, only change the necessary parts that is updated by new description.\\
-    Unless chenged in description, donnot change html and body Styles or svg styles in the <style> tag.\\
-    Include updated code and the explanation of what changed in the updated description, and why your change in the code can match this description change, and how your change didn't affect the existing code pieces or CSS Styles that remains the same according to description.\\
+    Make sure to modify as little code as possible, keep as many original objects and structures as possible, and only change the necessary parts that is updated by the new description.\\
+    Unless changed in description, don't change html and body Styles or svg styles in the <style> tag.\\
+    Include updated code and the explanation of what changed in the updated description, and why your change in the code can match this description change, and how your change didn't affect the existing code pieces or CSS Styles that remains the same according to the description.\\
     Return response in this format: (Code:  \`\`\`html html code \`\`\`html, \`\`\`js javascript code, leave blank if none \`\`\`js, \`\`\`css css code, leave blank if none \`\`\`css; Explanation: explanation content)`;
-    try {
+     try {
       // const response = await fetch("https://api.openai.com/v1/chat/completions", {
       //   method: "POST",
       //   headers: {
@@ -386,10 +388,11 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
     const newPrompt = `Slightly refine the given description for the code, to make it fit the code better. Code: HTML: \`\`\`html${newCode.html}\`\`\` CSS: \`\`\`css${newCode.css}\`\`\` JS: \`\`\`js${newCode.js}\`\`\` Description: ${existingDescription}.\\
     New description format:\\
     xxxxx[entity1]{detail for entity1}xxxx[entity2]{detail for entity2}... \\ 
-    Important: One [] only contain one entity and one {} only contain one detail. Each entity and each detail are wrapped in a [] and {} respectively. Include nothing but the new description in the response.\\
+    In [] are important entities for the animation, and in {} behind each entity are all the details about the corresponding entity in the code, including all the variable names, numbers, and parameters. 
+    Important: One [] only contains one entity and one {} only contains one detail. Each entity and each detail are wrapped in a [] and {} respectively. Include nothing but the new description in the response.\\
     Example description:
     [fishes]{#fish1 and #fish2, orange-colored, marine creatures depicted using polygonal SVG elements} shaped as [complex polygons]{polygonal shapes simulating the bodily form of fish with points configured in specific coordinates} are [swimming]{both #fish1 and #fish2 are animated to dynamically move along their designated paths:#path1 and #path2, predefined SVG paths depicted as smooth wavy lines} across an [ocean]{visualized by a large rectangular area filled with a vertical blue gradient, representing water}\\
-    Just as the old description, make sure it is made of coherent sentences with words other than entities and details.\\
+    Just as with the old description, make sure it is made of coherent sentences with words other than entities and details.\\
     Try to keep the updated description as close to the old description as possible, only change necessary parts to fit the code better.\\
     Include only the updated description in the response.`;
     try {
@@ -454,22 +457,22 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
 
     try {
       const prompt = `Help me extend a prompt and add more details. The prompt is for creating animations with anime.js. 
-      Extend the original prompt, to make it more expressive with more details that suits the prompt description and also give more clear instructions to what the animation code should be (e.g., tell in detail elements (e.g., eyes, windows) of objects (e.g., fish, house), the features (e.g., shape, color) and the changes (e.g., movement, size, color) as well as how they are made in animation code).
+      Extend the original prompt, to make it more expressive with more details that suit the prompt description and also give clearer instructions as to what the animation code should be (e.g., tell in detail elements (e.g., eyes, windows) of objects (e.g., fish, house), the features (e.g., shape, color) and the changes (e.g., movement, size, color) as well as how they are made in animation code).
       Just add details and descriptions without changing the sentence structure.\\
       return 4 extended prompts in the response (divided by ///), and only return these extended. prompts in the response.
-      Make the extended prompt simple and precise, just describe the necessary details. Do not add too many subjective modifiers and contents irrelevant to original prompt.
+      Make the extended prompt simple and precise, just describe the necessary details. Do not add too many subjective modifiers and contents irrelevant to the original prompt.
       Example:
       Original prompt:
-      A fish swimming in ocean
+      A fish swimming in the ocean
 
       response:
-      a blue fish with large eyes and flowing fins swimming straight in blue ocean.
+      a blue fish with large eyes and flowing fins swimming straight into the blue ocean.
       ///
-      a fish with intricate scales, a bright orange body, and a curved tail swimming in waving paths in darkblue ocean.
+      a fish with intricate scales, a bright orange body, and a curved tail swimming in waving paths in the dark blue ocean.
       ///
-      a tropical fish with vibrant stripes of yellow, green, and red with a streamlined body and sharp, pointed fins swimming slowly in blue ocean.
+      a tropical fish with vibrant stripes of yellow, green, and red with a streamlined body and sharp, pointed fins swimming slowly in the blue ocean.
       ///
-      a fish with a round body, whimsical patterns on its scales with small black eyes swimming from left to right in waving ocean.
+      a fish with a round body, whimsical patterns on its scales with small black eyes swimming from left to right in the waving ocean.
 
       Extend this prompt: ${version?.description}`;
 

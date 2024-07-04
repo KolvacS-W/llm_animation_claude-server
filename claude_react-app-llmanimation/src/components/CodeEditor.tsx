@@ -27,7 +27,7 @@ interface CodeEditorProps {
 }
 
 const API_KEY = '';
-const ngrok_url = 'https://14a7-104-199-195-83.ngrok-free.app';
+const ngrok_url = 'https://c7c8-34-81-36-117.ngrok-free.app';
 const ngrok_url_sonnet = ngrok_url+'/api/message';
 const ngrok_url_haiku = ngrok_url+'/api/message-haiku';
 
@@ -348,16 +348,17 @@ const CustomCodeEditor: React.FC<CodeEditorProps> = ({
       return updatedVersions;
     });
 
-    const prompt = `Based on the following existing old description describing old code and the updated code, provide an updated description reflecting changes to the code. \\
+    const prompt = `Based on the following existing old description describing the old code and the updated code, provide an updated description reflecting changes to the code. \\
     Old description: ${description}. \\
     Old code: HTML: \`\`\`html${savedOldCode.html}\`\`\` CSS: \`\`\`css${savedOldCode.css}\`\`\` JS: \`\`\`js${savedOldCode.js}\`\`\` \\
     Updated code: HTML: \`\`\`html${html}\`\`\` CSS: \`\`\`css${css}\`\`\` JS: \`\`\`js${js}\`\`\` \\
     Description format:\\
     xxxxx[entity1]{detail for entity1}xxxx[entity2]{detail for entity2}... \\ 
-    Important: One [] only contain one entity and one {} only contain one detail. Each entity and each detail are wrapped in a [] and {} respectively. Include nothing but the new description in the response.\\
+    In [] are important entities for the animation, and in {} behind each entity are all the details about the corresponding entity in the code, including all the variable names, numbers, and parameters. 
+    Important: One [] only contains one entity and one {} only contains one detail. Each entity and each detail are wrapped in a [] and {} respectively. Include nothing but the new description in the response.\\
     Example description:
     [fishes]{#fish1 and #fish2, orange-colored, marine creatures depicted using polygonal SVG elements} shaped as [complex polygons]{polygonal shapes simulating the bodily form of fish with points configured in specific coordinates} are [swimming]{both #fish1 and #fish2 are animated to dynamically move along their designated paths:#path1 and #path2, predefined SVG paths depicted as smooth wavy lines} across an [ocean]{visualized by a large rectangular area filled with a vertical blue gradient, representing water}\\
-    Just as the old description, make sure it is made of coherent sentences with words other than entities and details.\\
+    Just as with the old description, make sure it is made of coherent sentences with words other than entities and details.\\
     Include only the updated description in the response.`;
 
     try {
