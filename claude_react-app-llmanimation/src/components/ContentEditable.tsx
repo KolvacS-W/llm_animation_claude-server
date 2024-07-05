@@ -182,19 +182,20 @@ const ContentEditable: React.FC<ContentEditableProps> = ({ value, onChange, onRi
         const detail = match[2];
         details.push(detail);
         const isShown = versions.find(version => version.id === currentVersionId)?.showDetails[word];
-        const isParamHighlighted = paramCheckEnabled && specificParamList.includes(detail);
   
         let formattedDetail = detail;
-        if(versions.find(version => version.id === currentVersionId)?.paramCheckEnabled){
-          specificParamList.forEach(param => {
-            if (detail.includes(param.trim()) && param != '') {
-              formattedDetail = detail.replace(param, `<span style="color: green;" data-word="${param}">${param}</span>`);
-            }
-          });
-        }  
+        specificParamList.forEach(param => {
+          if (detail.includes(param.trim()) && param != '') {
+            formattedDetail = formattedDetail.replace(
+              new RegExp(`(${param.trim()})`, 'g'),
+              `<span style="background-color: #FADBD8;" data-word="${param.trim()}">$1</span>`
+            );
+          }
+        });
+  
         return `
           <span>
-            <span style="color: ${isParamHighlighted ? 'green' : 'red'}; cursor: pointer;" data-word="${word}">
+            <span style="color: red; cursor: pointer;" data-word="${word}">
               [${word}]
             </span>
             ${isShown ? `<span style="color: MediumVioletRed;">{${formattedDetail}}</span>` : ''}
@@ -215,6 +216,7 @@ const ContentEditable: React.FC<ContentEditableProps> = ({ value, onChange, onRi
   
     return formatted;
   };
+  
   
   
   
