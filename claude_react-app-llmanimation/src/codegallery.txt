@@ -813,4 +813,85 @@ A [white rabbit] {composed of a round body and head, with additional details suc
 </body>
 </html>
 
-a single bird with a sleek, aerodynamic body and a sharp beak spreading its wings to swoop and turn through the vast, open sky dotted with puffy white clouds and a radiant, yellow sun.
+[Majestic eagle] {SVG paths for body, head, beak, eyes, and wings; colored with #704214 for body, #FFFFFF for head, #FFD700 for beak, #000000 for eyes, and #5D3A1A for wings} with a [sharp hooked beak] {SVG path with class 'eagle-beak', triangular shape} and [powerful wings] {two SVG paths with class 'eagle-wing', animated to rotate between -1 and 1 degrees} [folded at its sides] {positioned on either side of the body} [perched] {static position} atop a [tall, leafy tree] {SVG paths for trunk (class 'tree-trunk', #8B4513) and leaves (class 'tree-leaves', #228B22), leaves animated to scale between 1 and 1.02} against a [serene sky] {SVG rect with class 'sky', colored #87CEEB} with [scattered clouds] {two SVG paths with class 'cloud', colored #FFFFFF, animated to move horizontally from 0% to 100%} drifting in the background.
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Majestic Eagle on a Tree</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #87CEEB;
+        }
+        #animation-container {
+            width: 400px;
+            height: 400px;
+            position: relative;
+            overflow: hidden;
+        }
+        .sky { fill: #87CEEB; }
+        .cloud { fill: #FFFFFF; }
+        .tree-trunk { fill: #8B4513; }
+        .tree-leaves { fill: #228B22; }
+        .eagle-body { fill: #704214; }
+        .eagle-head { fill: #FFFFFF; }
+        .eagle-beak { fill: #FFD700; }
+        .eagle-eye { fill: #000000; }
+        .eagle-wing { fill: #5D3A1A; }
+    </style>
+</head>
+<body>
+    <div id="animation-container">
+        <svg width="100%" height="100%" viewBox="0 0 400 400">
+            <rect class="sky" width="400" height="400" />
+            <path class="cloud" d="M50 80 Q70 50 100 70 Q130 40 160 70 Q180 60 190 80 Q160 90 130 85 Q100 95 50 80 Z" />
+            <path class="cloud" d="M250 50 Q270 20 300 40 Q330 10 360 40 Q380 30 390 50 Q360 60 330 55 Q300 65 250 50 Z" />
+            <path class="tree-trunk" d="M180 400 L200 150 L220 400 Z" />
+            <path class="tree-leaves" d="M200 150 Q130 200 100 300 Q200 250 300 300 Q270 200 200 150 Z" />
+            <path class="eagle-body" d="M180 160 Q200 140 220 160 L220 200 Q200 210 180 200 Z" />
+            <path class="eagle-head" d="M190 150 Q200 140 210 150 L210 165 Q200 170 190 165 Z" />
+            <path class="eagle-beak" d="M195 155 L205 155 L200 165 Z" />
+            <circle class="eagle-eye" cx="197" cy="153" r="2" />
+            <circle class="eagle-eye" cx="203" cy="153" r="2" />
+            <path class="eagle-wing" d="M180 170 Q160 180 170 200 Q180 190 180 170 Z" />
+            <path class="eagle-wing" d="M220 170 Q240 180 230 200 Q220 190 220 170 Z" />
+        </svg>
+    </div>
+
+    <script>
+        anime({
+            targets: '.cloud',
+            translateX: ['0%', '100%'],
+            duration: 20000,
+            easing: 'linear',
+            loop: true
+        });
+
+        anime({
+            targets: '.tree-leaves',
+            scale: [1, 1.02, 1],
+            duration: 3000,
+            easing: 'easeInOutQuad',
+            loop: true
+        });
+
+        anime({
+            targets: '.eagle-wing',
+            rotate: [-1, 1],
+            duration: 2000,
+            easing: 'easeInOutQuad',
+            loop: true
+        });
+    </script>
+</body>
+</html>

@@ -122,6 +122,7 @@ const ContentEditable: React.FC<ContentEditableProps> = ({ value, onChange, onRi
     event.preventDefault();
     const target = event.target as HTMLSpanElement;
     let word = target.getAttribute("data-word");
+    console.log('right click', word)
   
     if (!word) {
       const parent = target.closest('[data-word]');
@@ -184,12 +185,13 @@ const ContentEditable: React.FC<ContentEditableProps> = ({ value, onChange, onRi
         const isParamHighlighted = paramCheckEnabled && specificParamList.includes(detail);
   
         let formattedDetail = detail;
-        specificParamList.forEach(param => {
-          if (detail.includes(param.trim()) && param != '') {
-            formattedDetail = detail.replace(param, `<span style="color: green;" data-word="${param}">${param}</span>`);
-          }
-        });
-  
+        if(versions.find(version => version.id === currentVersionId)?.paramCheckEnabled){
+          specificParamList.forEach(param => {
+            if (detail.includes(param.trim()) && param != '') {
+              formattedDetail = detail.replace(param, `<span style="color: green;" data-word="${param}">${param}</span>`);
+            }
+          });
+        }  
         return `
           <span>
             <span style="color: ${isParamHighlighted ? 'green' : 'red'}; cursor: pointer;" data-word="${word}">
@@ -257,7 +259,7 @@ const ContentEditable: React.FC<ContentEditableProps> = ({ value, onChange, onRi
       onContextMenu={handleRightClick}
       onDoubleClick={handleDoubleClick}
       className="custom-textarea"
-      dangerouslySetInnerHTML={{ __html: versions.find(version => version.id === currentVersionId)?.formatDescriptionHtml || '' }}
+      dangerouslySetInnerHTML={{ __html: versions.find(version => version.id === currentVersionId)?.formatDescriptionHtml.replace('] {', ']{') || '' }}
       style={{ outline: 'none' }} // Remove the blue border outline
     />
   );

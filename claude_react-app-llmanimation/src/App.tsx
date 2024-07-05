@@ -349,7 +349,7 @@ const App: React.FC = () => {
     if (!currentVersion) return;
   
     const newId = `${currentVersion.id}-test`;
-    const prefix = 'In the description, words in [] are important entities, and following entities are detailed hints in {} to specify how to create these entities and animations. '
+    const prefix = 'In the description, words in [] are important entities, and following entities are detailed hints in {} to specify how to create these entities and animations.\n '
     const newVersion: Version = {
       id: newId,
       description: prefix +currentVersion.description,
