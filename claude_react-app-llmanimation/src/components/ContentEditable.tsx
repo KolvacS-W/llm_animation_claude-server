@@ -34,6 +34,7 @@ const ContentEditable: React.FC<ContentEditableProps> = ({ value, onChange, onRi
   useEffect(() => {
     console.log('contenteditable-useeffect', value)
     const formattedvalue = formatDescription(value);
+    console.log('useeffect check formattedvalue:', formattedvalue)
     setVersions((prevVersions) => {
       const updatedVersions = prevVersions.map(version =>
         version.id === currentVersionId
@@ -44,7 +45,7 @@ const ContentEditable: React.FC<ContentEditableProps> = ({ value, onChange, onRi
     });  
     // console.log('contenteditable-useeffect2', formattedvalue)
     // console.log('contenteditable-useeffect3', versions)
-  }, [value, versions.find(version => version.id === currentVersionId)?.showDetails]);
+  }, [value, versions.find(version => version.id === currentVersionId)?.showDetails, value, versions.find(version => version.id === currentVersionId)?.specificParamList]);
 
   //user edit desc
   const handleInput = (event: React.FormEvent<HTMLSpanElement>) => {
@@ -121,19 +122,27 @@ const ContentEditable: React.FC<ContentEditableProps> = ({ value, onChange, onRi
     event.preventDefault();
     const target = event.target as HTMLSpanElement;
     let word = target.getAttribute("data-word");
-    console.log('right clicked', word, specificParamList)
-
+  
     if (!word) {
       const parent = target.closest('[data-word]');
       if (parent) {
         word = parent.getAttribute('data-word');
+      } else {
+        const detailSpan = target.closest('span[style="color: MediumVioletRed;"]');
+        if (detailSpan) {
+          const detailText = detailSpan.textContent || '';
+          specificParamList.forEach(param => {
+            if (detailText.includes(param.trim())) {
+              word = param;
+            }
+          });
+        }
       }
     }
   
     if (word) {
       if (paramCheckEnabled && specificParamList.some(param => word && param.includes(word))) {
         const fullParam = specificParamList.find(param => word && param.includes(word));
-        console.log('clicked param', fullParam)
         if (fullParam) {
           onSpecificParamRightClick(fullParam);
         }
@@ -144,6 +153,7 @@ const ContentEditable: React.FC<ContentEditableProps> = ({ value, onChange, onRi
       }
     }
   };
+  
   
   
 
@@ -171,16 +181,12 @@ const ContentEditable: React.FC<ContentEditableProps> = ({ value, onChange, onRi
         const detail = match[2];
         details.push(detail);
         const isShown = versions.find(version => version.id === currentVersionId)?.showDetails[word];
-        const isParamHighlighted = paramCheckEnabled && specificParamList.includes(word);
+        const isParamHighlighted = paramCheckEnabled && specificParamList.includes(detail);
   
         let formattedDetail = detail;
         specificParamList.forEach(param => {
-          if (detail.includes(param)) {
-            formattedDetail = formattedDetail.replace(new RegExp(`\\b${param}\\b`, 'g'), `
-              <span style="color: green;" data-word="${param}">
-                ${param}
-              </span>
-            `);
+          if (detail.includes(param.trim()) && param != '') {
+            formattedDetail = detail.replace(param, `<span style="color: green;" data-word="${param}">${param}</span>`);
           }
         });
   
@@ -209,9 +215,6 @@ const ContentEditable: React.FC<ContentEditableProps> = ({ value, onChange, onRi
   };
   
   
-  
-  
-
   
 
   const sanitizeText = (html: string): string => {

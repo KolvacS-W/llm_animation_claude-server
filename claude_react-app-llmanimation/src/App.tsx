@@ -352,7 +352,25 @@ const App: React.FC = () => {
     const prefix = 'In the description, words in [] are important entities, and following entities are detailed hints in {} to specify how to create these entities and animations. '
     const newVersion: Version = {
       id: newId,
-      description: prefix +currentVersion.description
+      description: prefix +currentVersion.description,
+      savedOldDescription: '', 
+      code: { html: '', css: '', js: '' },
+      savedOldCode: { html: '', css: '', js: '' },
+      keywordTree: [
+        { level: 1, keywords: [] },
+        { level: 2, keywords: [] },
+      ],
+      wordselected: 'ocean',
+      highlightEnabled: false,
+      loading: false,
+      piecesToHighlightLevel1: [],
+      piecesToHighlightLevel2: [],
+      showDetails: {},
+      latestDescriptionText: '', 
+      hiddenInfo: [],
+      formatDescriptionHtml:'',
+      specificParamList: [], // Added
+      paramCheckEnabled: false, // Added
     };
   
     setVersions([...versions, newVersion]);

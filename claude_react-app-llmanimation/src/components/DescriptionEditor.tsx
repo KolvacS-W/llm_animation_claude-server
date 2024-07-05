@@ -11,7 +11,7 @@ import axios from 'axios';
 const API_KEY = '??';
 // const anthropic = new Anthropic({ apiKey: '' });
 
-const ngrok_url = 'https://8c9c-34-138-173-6.ngrok-free.app';
+const ngrok_url = 'https://6753-34-138-173-6.ngrok-free.app';
 const ngrok_url_sonnet = ngrok_url+'/api/message';
 const ngrok_url_haiku = ngrok_url+'/api/message-haiku';
 
@@ -53,19 +53,6 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
     });
   }, [versions.find(version => version.id === currentVersionId)?.description]);
 
-  // Re-render description when specificParamList changes
-  useEffect(() => {
-    if (currentVersionId && versions.find(version => version.id === currentVersionId)?.specificParamList) {
-      setVersions(prevVersions => {
-        const updatedVersions = prevVersions.map(v =>
-          v.id === currentVersionId
-            ? { ...v, description: v.description } // Trigger re-render
-            : v
-        );
-        return updatedVersions;
-      });
-    }
-  }, [versions.find(version => version.id === currentVersionId)?.specificParamList]);
 
   //save the last state of current version when it updates
   const saveVersionToHistory = (currentVersionId: string) => {
@@ -124,7 +111,7 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
                     filled in #006400
                     ///
                     fill="#87CEEB"
-                    
+                    Return nothing but only the text pieces and ///.
                     Return pieces from this description: ${version?.description} and target: `+detailtargetext;
     try {
       // const response = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -165,6 +152,7 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
     } catch (error) {
       console.error("Error processing request:", error);
     } finally {
+      console.log('check version after parsedescription', versions)
       setVersions(prevVersions => {
         const updatedVersions = prevVersions.map(version =>
           version.id === versionId
