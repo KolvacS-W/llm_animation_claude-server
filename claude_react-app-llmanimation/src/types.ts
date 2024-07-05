@@ -32,6 +32,7 @@ export interface KeywordNode {
     specificParamList: string[]; // 
     paramCheckEnabled: boolean;  // 
     history?: Version;  // Added for undo functionality
+    detailtargetext?: string[],
   }
   
   

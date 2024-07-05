@@ -11,7 +11,7 @@ import axios from 'axios';
 const API_KEY = '??';
 // const anthropic = new Anthropic({ apiKey: '' });
 
-const ngrok_url = 'https://6f12-34-138-67-51.ngrok-free.app';
+const ngrok_url = 'https://8c9c-34-138-173-6.ngrok-free.app';
 const ngrok_url_sonnet = ngrok_url+'/api/message';
 const ngrok_url_haiku = ngrok_url+'/api/message-haiku';
 
@@ -53,6 +53,20 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
     });
   }, [versions.find(version => version.id === currentVersionId)?.description]);
 
+  // Re-render description when specificParamList changes
+  useEffect(() => {
+    if (currentVersionId && versions.find(version => version.id === currentVersionId)?.specificParamList) {
+      setVersions(prevVersions => {
+        const updatedVersions = prevVersions.map(v =>
+          v.id === currentVersionId
+            ? { ...v, description: v.description } // Trigger re-render
+            : v
+        );
+        return updatedVersions;
+      });
+    }
+  }, [versions.find(version => version.id === currentVersionId)?.specificParamList]);
+
   //save the last state of current version when it updates
   const saveVersionToHistory = (currentVersionId: string) => {
     setVersions(prevVersions => {
@@ -78,26 +92,40 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
       );
       return updatedVersions;
     });
+
+    const detailtargetext = version?.detailtargetext || ''; // Added
   
-    const prompt = `Find the text pieces that are about specific code details (e.g., variable name, parameters, size, number, path, coordinates) from the given description of an animation program made by anime.js.
-                    and return a list of the found text pieces. make sure the returned text pieces are exactly from the description. Splift the text pieces with ///.
-                    Example description:
+    const prompt = `Given a description of an anime.js animation program and a target (about any specific parts of the description, like objects, features or animations), 
+                    Find all the text pieces in the description that are specific code details (e.g., variable name, parameters, size, number, path, coordinates) related to the target.
+                    Return a list of the found text pieces. make sure the returned text pieces are exactly from the description. Splift the text pieces with ///.
+                    Example:
+                    description:
                     A [cottage] {rect element with x: 50, y: 80, width: 100, height: 60, filled in white} perched on 
                     a [green mountain] {path element shaped to create a mountainous outline with coordinates "M0 140 L50 100 L100 140 L150 90 L200 140 L200 200 L0 200 Z", filled in #006400} under 
                     a [sky-blue background] {rect element covering the entire SVG's upper area with width="100%" and height="200", fill="#87CEEB"}.
+                    target: cottage
+                    response:
+                    ///
+                    with x: 50, y: 80, width: 100, height: 60, filled in white
+                    ///
 
-                    Example response:
-                    with x: 50, y: 80, width: 100, height: 60
+                    target: shape of objects
+                    response:
                     ///
                     with coordinates "M0 140 L50 100 L100 140 L150 90 L200 140 L200 200 L0 200 Z"
                     ///
+                     with width="100%" and height="200"
+                    ///
+
+                    target: color of objects
+                    response:
+                    filled in white
+                    ///
                     filled in #006400
                     ///
-                     with width="100%" and height="200"
-                     ///
-                     fill="#87CEEB"
+                    fill="#87CEEB"
                     
-                     Return pieces from this description: : ${version?.description}`;
+                    Return pieces from this description: ${version?.description} and target: `+detailtargetext;
     try {
       // const response = await fetch("https://api.openai.com/v1/chat/completions", {
       //   method: "POST",
@@ -183,7 +211,8 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
 
     const prompt = `Create an animation using anime.js based on the given instruction. 
     Make the result animation on a square page that can fit and center on any page.
-    Use svg shapes or customized polygons by defining points to create objects, and use svg path to create routes for the position movement of objects.
+    Use svg shapes or customized polygons by defining points to create objects, and use svg path to create routes for the position movement of objects. 
+    create all the objects or paths in html instead of in script.
     Don't use any external elements like images or svg, create everything with code.\\
     Make sure to implement as many details from the description as possible. e.g., include elements (e.g., eyes, windows) of objects (e.g., fish, house), the features (e.g., shape, color) and the changes (e.g., movement, size, color)).
     Donnot move the position of objects if there's no required position movement in instruction (e.g., growing big/tall and rotating should not involve position movement), and use transform-origin to prevent unexpected position change caused by animation.
@@ -771,9 +800,9 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
           onDoubleClick={handleDoubleClick}
           versions={versions}
           setVersions={setVersions}
-          paramCheckEnabled={version?.paramCheckEnabled || false} // Added
-          specificParamList={version?.specificParamList || []} // Added
-          onSpecificParamRightClick={handleSpecificParamRightClick} // Added
+          paramCheckEnabled={version?.paramCheckEnabled || false}
+          specificParamList={version?.specificParamList || []}
+          onSpecificParamRightClick={handleSpecificParamRightClick}
         />
       </div>
       <textarea
@@ -790,6 +819,21 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
           });
         }}
         placeholder="Enter description here"
+      />
+      <textarea
+        value={version?.detailtargetext || ''} // Added
+        onChange={(e) => {
+          if (!currentVersionId) return;
+          setVersions(prevVersions => {
+            const updatedVersions = prevVersions.map(version =>
+              version.id === currentVersionId
+                ? { ...version, detailtargetext: e.target.value }
+                : version
+            );
+            return updatedVersions;
+          });
+        }}
+        placeholder="Enter detail target text here" // Added
       />
       <div className="button-group">
         <button className="purple-button" onClick={() => handleExtend(currentVersionId || '')}>Extend</button>
@@ -819,6 +863,7 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
       )}
     </div>
   );
+  
   
 };
 

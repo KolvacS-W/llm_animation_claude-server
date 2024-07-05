@@ -705,5 +705,112 @@ A [white rabbit] {composed of a round body and head, with additional details suc
 </body>
 </html>
 
-[A white rabbit]{rabbit-body class, ellipse shape, fill color #ffffff, initially flat with ry: 0, animates to ry: 40 and translateY: -40} with [long ears]{rabbit-ear class, two path elements, fill color #ffffff, animate translateY: -100 and scaleY: 1.2} and a [pink nose]
-{rabbit-nose class, ellipse shape, fill color #ffb6c1, rx: 10, ry: 5} [popping out] {animation timeline using anime.js, duration 2000ms, easing 'easeOutElastic(1, .8)'} of a [black top hat] {hat-body class, path element, fill color #000000, animates from 'M100 300 Q200 50 300 300 Z' to 'M80 300 Q200 100 320 300 Z'} , with the hat's [brim] {hat-brim class, ellipse shape, fill color #000000, animates ry from 20 to 30 and scaleX to 0.9} and [body] {hat-body class, same as black top hat} slightly [distorting] {animation of hat-body and hat-brim} as the rabbit emerges.
+[A single bird]{SVG path element with id "bird", class "bird-body" for body, "bird-wing" for wings, and "bird-beak" for beak} with a [sleek, aerodynamic body]{path with curved shape using Q and T commands} and a [sharp beak]{triangular path element} [spreading its wings]{two separate wing paths with class "left-wing" and "right-wing"} to [swoop and turn]{anime.js animation with flightPath defined by 'M200,200 C100,100 300,300 100,200 S300,100 200,200', duration 6000ms, easing 'linear', loop true} through the [vast, open sky]{SVG rect element with class "sky", fill color #87CEEB} dotted with [puffy white clouds]{two SVG path elements with class "cloud", fill color #FFFFFF, animated to move horizontally} and a [radiant, yellow sun]{SVG circle element with class "sun", cx 350, cy 50, r 30, fill color #FFD700, animated opacity and scale}.
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bird Soaring Through Sky</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #87CEEB;
+        }
+        #animation-container {
+            width: 400px;
+            height: 400px;
+            position: relative;
+            overflow: hidden;
+        }
+        .sky {
+            fill: #87CEEB;
+        }
+        .sun {
+            fill: #FFD700;
+        }
+        .cloud {
+            fill: #FFFFFF;
+        }
+        .bird-body {
+            fill: #4A4A4A;
+        }
+        .bird-wing {
+            fill: #5A5A5A;
+        }
+        .bird-beak {
+            fill: #FFA500;
+        }
+    </style>
+</head>
+<body>
+    <div id="animation-container">
+        <svg width="100%" height="100%" viewBox="0 0 400 400">
+            <rect class="sky" width="400" height="400" />
+            <circle class="sun" cx="350" cy="50" r="30" />
+            <path class="cloud" d="M80 80 Q100 60 120 80 T160 80 T200 80 Q220 60 200 80 T160 100 T120 100 Q100 120 80 100 Z" />
+            <path class="cloud" d="M280 120 Q300 100 320 120 T360 120 T400 120 Q420 100 400 120 T360 140 T320 140 Q300 160 280 140 Z" />
+            <path id="flight-path" d="M200,200 C100,100 300,300 100,200 S300,100 200,200" fill="none" stroke="transparent"/>
+            <g id="bird" transform="translate(200, 200)">
+                <path class="bird-body" d="M0 0 Q20 -10 40 0 T80 0 Q60 10 40 20 T0 20 Q-10 10 0 0 Z" />
+                <path class="bird-wing left-wing" d="M20 0 Q0 -20 -40 -10 Q0 0 20 0" />
+                <path class="bird-wing right-wing" d="M60 0 Q80 -20 120 -10 Q80 0 60 0" />
+                <path class="bird-beak" d="M80 0 L90 -5 L90 5 Z" />
+            </g>
+        </svg>
+    </div>
+
+    <script>
+        const bird = document.getElementById('bird');
+        const leftWing = document.querySelector('.left-wing');
+        const rightWing = document.querySelector('.right-wing');
+
+        const flightPath = anime.path('#flight-path');
+
+        anime({
+            targets: bird,
+            translateX: flightPath('x'),
+            translateY: flightPath('y'),
+            rotate: flightPath('angle'),
+            duration: 6000,
+            easing: 'linear',
+            loop: true
+        });
+
+        anime({
+            targets: [leftWing, rightWing],
+            scaleY: [1, 0.5, 1],
+            duration: 500,
+            easing: 'easeInOutSine',
+            loop: true
+        });
+
+        anime({
+            targets: '.sun',
+            opacity: [0.7, 1],
+            scale: [1, 1.1],
+            duration: 2000,
+            easing: 'easeInOutQuad',
+            loop: true
+        });
+
+        anime({
+            targets: '.cloud',
+            translateX: '-100%',
+            duration: 20000,
+            easing: 'linear',
+            loop: true
+        });
+    </script>
+</body>
+</html>
+
+a single bird with a sleek, aerodynamic body and a sharp beak spreading its wings to swoop and turn through the vast, open sky dotted with puffy white clouds and a radiant, yellow sun.
