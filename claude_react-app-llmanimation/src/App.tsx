@@ -6,11 +6,12 @@ import './App.css';
 import { KeywordTree, Version } from './types';
 import { v4 as uuidv4 } from 'uuid';
 import ListGroup from 'react-bootstrap/ListGroup';
-
+import ReusableElementToolbar from './components/ReusableElementToolbar';
 
 const App: React.FC = () => {
   const [versions, setVersions] = useState<Version[]>([]);
   const [currentVersionId, setCurrentVersionId] = useState<string | null>(null);
+  const [hoveredElement, setHoveredElement] = useState<string | null>(null);
 
   useEffect(() => {
     // Initialize the base version on load
@@ -35,6 +36,8 @@ const App: React.FC = () => {
       formatDescriptionHtml:'',
       specificParamList: [], // Added
       paramCheckEnabled: false, // Added
+      reuseableElementList: [ { codeName: 'Circle', codeText: '<circle cx="50" cy="50" r="40" />' },
+        { codeName: 'Rectangle', codeText: '<rect width="100" height="80" />' },], // Added
     };
   
     setVersions([baseVersion]);
@@ -296,6 +299,7 @@ const App: React.FC = () => {
       formatDescriptionHtml:'',
       specificParamList: [], // Added
       paramCheckEnabled: false, // Added
+      reuseableElementList: [], // Added
     };
 
     setVersions([...versions, newVersion]);
@@ -371,12 +375,24 @@ const App: React.FC = () => {
       formatDescriptionHtml:'',
       specificParamList: [], // Added
       paramCheckEnabled: false, // Added
+      reuseableElementList: [], // Added
     };
   
     setVersions([...versions, newVersion]);
     setCurrentVersionId(newVersion.id);
   };
   
+  const handleDeleteReusableElement = (versionId: string, codeName: string) => {
+    setVersions(prevVersions => {
+      const updatedVersions = prevVersions.map(version =>
+        version.id === versionId
+          ? { ...version, reuseableElementList: version.reuseableElementList.filter(element => element.codeName !== codeName) }
+          : version
+      );
+      return updatedVersions;
+    });
+  };
+
   return (
     <div className="App">
       <div className="editor-section">
@@ -389,7 +405,7 @@ const App: React.FC = () => {
               currentVersionId={currentVersionId}
               versions={versions}
               setVersions={setVersions}
-              extractKeywords={extractKeywords} // Pass extractKeywords as a prop
+              extractKeywords={extractKeywords}
             />
             <CustomCodeEditor
               code={versions.find(version => version.id === currentVersionId)!.code}
@@ -401,9 +417,16 @@ const App: React.FC = () => {
               currentVersionId={currentVersionId}
               versions={versions}
               setVersions={setVersions}
-              extractKeywords={extractKeywords} // Pass extractKeywords as a prop
+              extractKeywords={extractKeywords}
             />
             <ResultViewer code={versions.find(version => version.id === currentVersionId)!.code} />
+            <ReusableElementToolbar
+              currentVersionId={currentVersionId}
+              versions={versions}
+              setVersions={setVersions}
+              hoveredElement={hoveredElement}
+              setHoveredElement={setHoveredElement}
+            />
           </>
         )}
       </div>
@@ -426,21 +449,11 @@ const App: React.FC = () => {
             </button>
           ))}
         </div>
-        {/* <ListGroup as="ul" className="list-group version-list">
-          {versions.map(version => (
-            <ListGroup.Item as="li"
-              key={version.id}
-              className={`list-group-item ${currentVersionId === version.id ? 'active' : ''}`}
-              onClick={() => switchToVersion(version.id)}
-            >
-              {version.id}
-            </ListGroup.Item>
-          ))}
-        </ListGroup> */}
       </div>
     </div>
   );
-  
 }
-
+  
 export default App;
+
+

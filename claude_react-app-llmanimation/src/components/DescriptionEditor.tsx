@@ -617,6 +617,7 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
               formatDescriptionHtml:'',
               specificParamList: [], // Added
               paramCheckEnabled: false, // Added
+              reuseableElementList: [], // Added
             });
           });
           return updatedVersions;
