@@ -51,7 +51,14 @@ const ReusableElementToolbar: React.FC<ReusableElementToolbarProps> = ({
       return updatedVersions;
     });
     try {
-      const prompt = `read the following code for anime.js animation, and an element description, find all the code pieces that is relevant to the elements of that description, including definition, position, and animation code. Only include the code pieces in the response. Code: ${versions.find(version => version.id === versionId)?.code.html} , element description:` + inputValue;
+      const prompt = `read the following code for anime.js animation, and a description, find all the code pieces that is relevant to the elements of that description. 
+      The description can be about shape (html elements), color, and animation (anime.js script) features of an object. The code pieces need to be precisely related to one or multiple features according to the description.
+      Code: ${versions.find(version => version.id === versionId)?.code.html} , description:` + inputValue +`
+      Respond to this format:
+      object: ......
+      feature: ......
+      code piece: ......
+      Only use each "name + :" once in one response. If no feature is specified in description, find code piece of all the features of that object and include all relavant code in one single code piece: .....`;
       console.log('prompt for handleAddElement:', prompt);
       const response = await axios.post(ngrok_url_sonnet, {
         headers: {
@@ -67,7 +74,7 @@ const ReusableElementToolbar: React.FC<ReusableElementToolbarProps> = ({
       if (content) {
         const newElements = [{
           codeName: inputValue,
-          codeText: content
+          codeText: content.split('code piece:')[1]
         }];
 
         setVersions(prevVersions => {
@@ -109,19 +116,18 @@ const ReusableElementToolbar: React.FC<ReusableElementToolbarProps> = ({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      
       <div className="reusable-elements">
-      <div className="input-group">
-        <input
-          type="text"
-          value={inputValue}
-          onChange={handleInputChange}
-          placeholder="Enter element description"
-        />
-        <button onClick={() => currentVersionId && handleAddElement(currentVersionId)} disabled={loading}>
-          {loading ? 'Loading...' : 'Add'}
-        </button>
-      </div>
+        <div className="input-group">
+          <input
+            type="text"
+            value={inputValue}
+            onChange={handleInputChange}
+            placeholder="Enter element description"
+          />
+          <button onClick={() => currentVersionId && handleAddElement(currentVersionId)} disabled={loading}>
+            {loading ? 'Loading...' : 'Add'}
+          </button>
+        </div>
         {currentVersionId !== null && versions.find(version => version.id === currentVersionId)!.reuseableElementList.map((element, index) => (
           <div
             key={index}
