@@ -293,6 +293,10 @@ textarea {
   width: 100%;
 }
 
+.reusable-element-item.selected {
+  background-color: #cfe2ff; /* Highlighting selected elements */
+}
+
 .reusable-element-item {
   display: flex;
   align-items: center;

@@ -36,8 +36,7 @@ const App: React.FC = () => {
       formatDescriptionHtml:'',
       specificParamList: [], // Added
       paramCheckEnabled: false, // Added
-      reuseableElementList: [ { codeName: 'Circle', codeText: '<circle cx="50" cy="50" r="40" />' },
-        { codeName: 'Rectangle', codeText: '<rect width="100" height="80" />' },], // Added
+      reuseableElementList: [], // Added
     };
   
     setVersions([baseVersion]);
@@ -375,7 +374,7 @@ const App: React.FC = () => {
       formatDescriptionHtml:'',
       specificParamList: [], // Added
       paramCheckEnabled: false, // Added
-      reuseableElementList: [], // Added
+      reuseableElementList: currentVersion.reuseableElementList, // Added
     };
   
     setVersions([...versions, newVersion]);

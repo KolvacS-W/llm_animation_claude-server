@@ -197,7 +197,10 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
       return updatedVersions;
     });
 
-    const prompt = `Create an animation using anime.js based on the given instruction. 
+    const selectedElementcodeName = version?.reuseableElementList.filter(element => element.selected).map(element => element.codeName).join('\n') || '';
+    const selectedElementcodeText = version?.reuseableElementList.filter(element => element.selected).map(element => element.codeText).join('\n') || '';
+
+    let prompt = `Create an animation using anime.js based on the given instruction. 
     Make the result animation on a square page that can fit and center on any page.
     Use svg shapes or customized polygons by defining points to create objects, and use svg path to create routes for the position movement of objects. 
     create all the objects or paths in html instead of in script.
@@ -279,35 +282,9 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
     Try to include css and javascript code in html.
     Return response in this format: (Code:  \`\`\`html html code \`\`\`html, \`\`\`js javascript code, leave blank if none \`\`\`js, \`\`\`css css code, leave blank if none \`\`\`css; Explanation: explanations of the code). Instruction: ${version?.description}`;
     
-    // Without instruction, all the animated objects should follow the center of the object during animation.
-    //   const response = await fetch("https://api.openai.com/v1/chat/completions", {
-    //     method: "POST",
-    //     headers: {
-    //       "Authorization": `Bearer ${API_KEY}`,
-    //       "Content-Type": "application/json",
-    //     },
-    //     body: JSON.stringify({
-    //       model: "gpt-4",
-    //       messages: [{ role: "system", content: "You are a creative programmer." }, { role: "user", content: prompt }],
-    //     }),
-    //   });
-
-    //   const data = await response.json();
-    //   const content = data.choices[0]?.message?.content;
-
-    //   if (content) {
-    //     const newCode = parseGPTResponse(content);
-    //     setVersions(prevVersions => {
-    //       const updatedVersions = prevVersions.map(version =>
-    //         version.id === versionId
-    //           ? { ...version, code: newCode, savedOldCode: newCode }
-    //           : version
-    //       );
-    //       return updatedVersions;
-    //     });
-    //     await handleSecondGPTCall(newCode, version?.description || '', versionId);
-    //   }
-    // } 
+    if (selectedElementcodeName != ''){
+      prompt += `\n The following code pieces about `+selectedElementcodeName + `is already written for you, use them: `+selectedElementcodeText
+    }
     console.log(prompt)
     try {
           const response = await axios.post(ngrok_url_sonnet, {
@@ -406,7 +383,10 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
       return updatedVersions;
     });
 
-    const prompt = `Based on the following old code and its old description, I am showing you an updated description and you will provide an updated code. \\
+    const selectedElementcodeName = version?.reuseableElementList.filter(element => element.selected).map(element => element.codeName).join('\n') || '';
+    const selectedElementcodeText = version?.reuseableElementList.filter(element => element.selected).map(element => element.codeText).join('\n') || '';
+
+    let prompt = `Based on the following old code and its old description, I am showing you an updated description and you will provide an updated code. \\
     Old code: HTML: \`\`\`html${savedOldCode.html}\`\`\` CSS: \`\`\`css${savedOldCode.css}\`\`\` JS: \`\`\`js${savedOldCode.js}\`\`\` \\
     Old Description: ${versions.find(version => version.id === versionId)?.savedOldDescription}. \\
     New description: ${version?.description}. \\
@@ -418,21 +398,12 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
     Unless changed in description, don't change html and body Styles or svg styles in the <style> tag.\\
     Include updated code and the explanation of what changed in the updated description, and why your change in the code can match this description change, and how your change didn't affect the existing code pieces or CSS Styles that remains the same according to the description.\\
     Return response in this format: (Code:  \`\`\`html html code \`\`\`html, \`\`\`js javascript code, leave blank if none \`\`\`js, \`\`\`css css code, leave blank if none \`\`\`css; Explanation: explanation content)`;
-     try {
-      // const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      //   method: "POST",
-      //   headers: {
-      //     "Authorization": `Bearer ${API_KEY}`,
-      //     "Content-Type": "application/json",
-      //   },
-      //   body: JSON.stringify({
-      //     model: "gpt-4-turbo",
-      //     messages: [{ role: "system", content: "You are a creative programmer." }, { role: "user", content: prompt }],
-      //   }),
-      // });
-
-      // const data = await response.json();
-      // const content = data.choices[0]?.message?.content;
+     
+    if (selectedElementcodeName != ''){
+      prompt += `\n Donnot change the following code pieces about `+selectedElementcodeName + ` : `+selectedElementcodeText
+    }
+    
+    try {
       const response = await axios.post(ngrok_url_sonnet, {
         method: 'POST',
         headers: {

@@ -52,13 +52,12 @@ const ReusableElementToolbar: React.FC<ReusableElementToolbarProps> = ({
     });
     try {
       const prompt = `read the following code for anime.js animation, and a description, find all the code pieces that is relevant to the elements of that description. 
-      The description can be about shape (html elements), color, and animation (anime.js script) features of an object. The code pieces need to be precisely related to one or multiple features according to the description.
+      The description will be in format of object + feature. There are 3 types of features: shape (html elements), color, and animation (anime.js script). The code pieces need to be precisely related to one or multiple features according to the description.
       Code: ${versions.find(version => version.id === versionId)?.code.html} , description:` + inputValue +`
-      Respond to this format:
+      Respond to this format and don't include anything else in response:
       object: ......
       feature: ......
-      code piece: ......
-      Only use each "name + :" once in one response. If no feature is specified in description, find code piece of all the features of that object and include all relavant code in one single code piece: .....`;
+      code piece: ...... Only return the features the description is talking about. If there's no code piece for the object + feature of the description, return empty for code piece`;
       console.log('prompt for handleAddElement:', prompt);
       const response = await axios.post(ngrok_url_sonnet, {
         headers: {
@@ -74,9 +73,29 @@ const ReusableElementToolbar: React.FC<ReusableElementToolbarProps> = ({
       if (content) {
         const newElements = [{
           codeName: inputValue,
-          codeText: content.split('code piece:')[1]
+          codeText: content,
+          selected: false
         }];
 
+        // if (content) {
+        //   // Split the content by 'code piece:'
+        //   const splitContent = content.split('code piece:');
+
+        //   console.log('splited array:', splitContent)
+          
+        //   // Filter the array to include only even index items
+        //   const evenIndexItems = splitContent.filter((item, index) => index % 2 === 1);
+        
+        //   // Join the filtered items back into a string (if needed)
+        //   const filteredContent = evenIndexItems.join('code piece:');
+        
+        //   // Create the newElements array with the filtered content
+        //   const newElements = [{
+        //     codeName: inputValue,
+        //     codeText: filteredContent,
+        //     selected: false
+        //   }];
+  
         setVersions(prevVersions => {
           const updatedVersions = prevVersions.map(version =>
             version.id === currentVersionId
@@ -110,6 +129,24 @@ const ReusableElementToolbar: React.FC<ReusableElementToolbarProps> = ({
     setIsMouseOver(false);
   };
 
+  const handleElementClick = (versionId: string, codeName: string) => {
+    setVersions(prevVersions => {
+      const updatedVersions = prevVersions.map(version =>
+        version.id === versionId
+          ? {
+              ...version,
+              reuseableElementList: version.reuseableElementList.map(element =>
+                element.codeName === codeName
+                  ? { ...element, selected: !element.selected }
+                  : element
+              )
+            }
+          : version
+      );
+      return updatedVersions;
+    });
+  };
+
   return (
     <div
       className={`reusable-element-toolbar ${isMouseOver ? 'expanded' : ''}`}
@@ -129,21 +166,22 @@ const ReusableElementToolbar: React.FC<ReusableElementToolbarProps> = ({
           </button>
         </div>
         {currentVersionId !== null && versions.find(version => version.id === currentVersionId)!.reuseableElementList.map((element, index) => (
-          <div
-            key={index}
-            className="reusable-element-item"
-            onMouseEnter={() => setHoveredElement(element.codeText)}
-            onMouseLeave={() => setHoveredElement(null)}
-          >
-            <span>{element.codeName}</span>
-            <button className="delete-icon" onClick={() => handleDeleteReusableElement(currentVersionId, element.codeName)}>🗑️</button>
-            {hoveredElement === element.codeText && (
-              <div className="hovered-element-text">
-                <pre>{element.codeText}</pre>
-              </div>
-            )}
-          </div>
-        ))}
+        <div
+          key={index}
+          className={`reusable-element-item ${element.selected ? 'selected' : ''}`}
+          onClick={() => handleElementClick(currentVersionId, element.codeName)}
+          onMouseEnter={() => setHoveredElement(element.codeText)}
+          onMouseLeave={() => setHoveredElement(null)}
+        >
+          <span>{element.codeName}</span>
+          <button className="delete-icon" onClick={() => handleDeleteReusableElement(currentVersionId, element.codeName)}>🗑️</button>
+          {hoveredElement === element.codeText && (
+            <div className="hovered-element-text">
+              <pre>{element.codeText}</pre>
+            </div>
+          )}
+        </div>
+      ))}
       </div>
     </div>
   );
