@@ -33,6 +33,7 @@ export interface KeywordNode {
     paramCheckEnabled: boolean;  // 
     history?: Version;  // Added for undo functionality
     detailtargetext?: string[],
+    reuseableElementList: { codeName: string, codeText: string }[];
   }
   
   

@@ -10,6 +10,9 @@ interface ReusableElementToolbarProps {
   setHoveredElement: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
+const ngrok_url = 'https://fd9f-34-148-39-12.ngrok-free.app';
+const ngrok_url_sonnet = ngrok_url + '/api/message';
+
 const ReusableElementToolbar: React.FC<ReusableElementToolbarProps> = ({
   currentVersionId,
   versions,
@@ -18,6 +21,9 @@ const ReusableElementToolbar: React.FC<ReusableElementToolbarProps> = ({
   setHoveredElement,
 }) => {
   const [inputValue, setInputValue] = useState('');
+  const [isMouseOver, setIsMouseOver] = useState(false);
+  const version = versions.find(version => version.id === currentVersionId);
+  const loading = version ? version.loading : false;
 
   const handleDeleteReusableElement = (versionId: string, codeName: string) => {
     setVersions(prevVersions => {
@@ -34,30 +40,77 @@ const ReusableElementToolbar: React.FC<ReusableElementToolbarProps> = ({
     setInputValue(e.target.value);
   };
 
-  const handleAddElement = async () => {
-    if (currentVersionId === null) return;
-
+  const handleAddElement = async (versionId: string) => {
+    if (!currentVersionId) return; // Ensure currentVersionId is not null
+    setVersions(prevVersions => {
+      const updatedVersions = prevVersions.map(version =>
+        version.id === versionId
+          ? { ...version, loading: true }
+          : version
+      );
+      return updatedVersions;
+    });
     try {
-      const response = await axios.post('/api/claude', { prompt: inputValue });
-      const newElements = response.data.elements; // Adjust based on your API response structure
+      const prompt = `read the following code for anime.js animation, and an element description, find all the code pieces that is relevant to the elements of that description, including definition, position, and animation code. Only include the code pieces in the response. Code: ${versions.find(version => version.id === versionId)?.code.html} , element description:` + inputValue;
+      console.log('prompt for handleAddElement:', prompt);
+      const response = await axios.post(ngrok_url_sonnet, {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ prompt: prompt })
+      });
 
+      const data = await response.data;
+      const content = data?.content;
+      console.log('content from handleAddElement:', content);
+
+      if (content) {
+        const newElements = [{
+          codeName: inputValue,
+          codeText: content
+        }];
+
+        setVersions(prevVersions => {
+          const updatedVersions = prevVersions.map(version =>
+            version.id === currentVersionId
+              ? { ...version, reuseableElementList: [...version.reuseableElementList, ...newElements] }
+              : version
+          );
+          return updatedVersions;
+        });
+
+        setInputValue(''); // Clear input after adding
+      }
+    } catch (error) {
+      console.error('Error adding reusable element:', error);
+    } finally {
       setVersions(prevVersions => {
         const updatedVersions = prevVersions.map(version =>
-          version.id === currentVersionId
-            ? { ...version, reuseableElementList: [...version.reuseableElementList, ...newElements] }
+          version.id === versionId
+            ? { ...version, loading: false }
             : version
         );
         return updatedVersions;
       });
-
-      setInputValue(''); // Clear input after adding
-    } catch (error) {
-      console.error('Error adding reusable element:', error);
     }
   };
 
+  const handleMouseEnter = () => {
+    setIsMouseOver(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsMouseOver(false);
+  };
+
   return (
-    <div className="reusable-element-toolbar">
+    <div
+      className={`reusable-element-toolbar ${isMouseOver ? 'expanded' : ''}`}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      
+      <div className="reusable-elements">
       <div className="input-group">
         <input
           type="text"
@@ -65,24 +118,27 @@ const ReusableElementToolbar: React.FC<ReusableElementToolbarProps> = ({
           onChange={handleInputChange}
           placeholder="Enter element description"
         />
-        <button onClick={handleAddElement}>Add</button>
+        <button onClick={() => currentVersionId && handleAddElement(currentVersionId)} disabled={loading}>
+          {loading ? 'Loading...' : 'Add'}
+        </button>
       </div>
-      {currentVersionId !== null && versions.find(version => version.id === currentVersionId)!.reuseableElementList.map((element, index) => (
-        <div
-          key={index}
-          className="reusable-element-item"
-          onMouseEnter={() => setHoveredElement(element.codeText)}
-          onMouseLeave={() => setHoveredElement(null)}
-        >
-          <span>{element.codeName}</span>
-          <button className="delete-icon" onClick={() => handleDeleteReusableElement(currentVersionId, element.codeName)}>🗑️</button>
-          {hoveredElement === element.codeText && (
-            <div className="hovered-element-text">
-              <pre>{element.codeText}</pre>
-            </div>
-          )}
-        </div>
-      ))}
+        {currentVersionId !== null && versions.find(version => version.id === currentVersionId)!.reuseableElementList.map((element, index) => (
+          <div
+            key={index}
+            className="reusable-element-item"
+            onMouseEnter={() => setHoveredElement(element.codeText)}
+            onMouseLeave={() => setHoveredElement(null)}
+          >
+            <span>{element.codeName}</span>
+            <button className="delete-icon" onClick={() => handleDeleteReusableElement(currentVersionId, element.codeName)}>🗑️</button>
+            {hoveredElement === element.codeText && (
+              <div className="hovered-element-text">
+                <pre>{element.codeText}</pre>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

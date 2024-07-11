@@ -11,7 +11,7 @@ import axios from 'axios';
 const API_KEY = '??';
 // const anthropic = new Anthropic({ apiKey: '' });
 
-const ngrok_url = 'https://de2b-34-145-4-237.ngrok-free.app';
+const ngrok_url = 'https://fd9f-34-148-39-12.ngrok-free.app';
 const ngrok_url_sonnet = ngrok_url+'/api/message';
 const ngrok_url_haiku = ngrok_url+'/api/message-haiku';
 
