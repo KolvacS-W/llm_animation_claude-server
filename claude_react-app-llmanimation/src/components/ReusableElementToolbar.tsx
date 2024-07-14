@@ -10,7 +10,7 @@ interface ReusableElementToolbarProps {
   setHoveredElement: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
-const ngrok_url = 'https://fd9f-34-148-39-12.ngrok-free.app';
+const ngrok_url = 'https://ba20-35-237-152-20.ngrok-free.app';
 const ngrok_url_sonnet = ngrok_url + '/api/message';
 
 const ReusableElementToolbar: React.FC<ReusableElementToolbarProps> = ({
@@ -52,7 +52,7 @@ const ReusableElementToolbar: React.FC<ReusableElementToolbarProps> = ({
     });
     try {
       const prompt = `read the following code for anime.js animation, and a description, find all the code pieces that is relevant to the elements of that description. 
-      The description will be in format of object + feature. There are 3 types of features: shape (html elements), color, and animation (anime.js script). The code pieces need to be precisely related to one or multiple features according to the description.
+      The description will be in format of object + feature. There are 3 types of features: shape (html elements), color, and movement (anime.js script). The code pieces need to be precisely related to one or multiple features according to the description.
       Code: ${versions.find(version => version.id === versionId)?.code.html} , description:` + inputValue +`
       Respond to this format and don't include anything else in response:
       object: ......

@@ -895,3 +895,216 @@ A [white rabbit] {composed of a round body and head, with additional details suc
     </script>
 </body>
 </html>
+
+A [sailboat] {SVG path elements for hull, mast, and sail; boat-hull class with #8B4513 fill, boat-mast class with #8B4513 fill, boat-sail class with gradient fill} with a [wooden hull] {boat-hull class with #8B4513 fill} , a [tall mast] {boat-mast class with #8B4513 fill} , and a [colorful billowing sail] {boat-sail class with gradient fill, animating between two d attribute values} [gliding] {translateX and translateY animation, moving 100px horizontally and -10px vertically over 6000ms} across the [rolling blue waves] {two wave path elements with #4169E1 fill, animating up and down 5px over 2000ms} with a [bright sun] {circle element with sun class, #FFD700 fill, 30px radius, animating up and down 5px over 3000ms} and [fluffy white clouds] {two cloud path elements with #FFFFFF fill, animating horizontally 20px over 4000ms} in the background.
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sailboat Animation</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #87CEEB;
+        }
+        #animation-container {
+            width: 400px;
+            height: 400px;
+            position: relative;
+            overflow: hidden;
+        }
+        .sun {
+            fill: #FFD700;
+        }
+        .cloud {
+            fill: #FFFFFF;
+        }
+        .wave {
+            fill: #4169E1;
+        }
+        .boat-hull {
+            fill: #8B4513;
+        }
+        .boat-mast {
+            fill: #8B4513;
+        }
+        .boat-sail {
+            fill: url(#sailGradient);
+        }
+    </style>
+</head>
+<body>
+    <div id="animation-container">
+        <svg width="100%" height="100%" viewBox="0 0 400 400">
+            <defs>
+                <linearGradient id="sailGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#FF0000"/>
+                    <stop offset="50%" style="stop-color:#00FF00"/>
+                    <stop offset="100%" style="stop-color:#0000FF"/>
+                </linearGradient>
+            </defs>
+            
+            <!-- Sun -->
+            <circle class="sun" cx="50" cy="50" r="30" />
+            
+            <!-- Clouds -->
+            <path class="cloud" d="M120 80 Q140 60 160 80 T200 80 T240 80 Q260 60 280 80 Q300 100 260 100 H140 Q100 100 120 80 Z" />
+            <path class="cloud" d="M280 40 Q300 20 320 40 T360 40 Q380 60 340 60 H300 Q260 60 280 40 Z" />
+            
+            <!-- Waves -->
+            <path class="wave" d="M0 250 Q50 200 100 250 T200 250 T300 250 T400 250 V400 H0 Z" />
+            <path class="wave" d="M0 300 Q50 250 100 300 T200 300 T300 300 T400 300 V400 H0 Z" />
+            
+            <!-- Boat -->
+            <path class="boat-hull" d="M150 250 L200 300 L250 250 Z" />
+            <rect class="boat-mast" x="198" y="180" width="4" height="70" />
+            <path class="boat-sail" d="M200 180 Q230 200 220 250 H200 Z" />
+        </svg>
+    </div>
+
+    <script>
+        anime({
+            targets: '.wave',
+            translateY: [-5, 5],
+            duration: 2000,
+            loop: true,
+            direction: 'alternate',
+            easing: 'easeInOutSine'
+        });
+
+        anime({
+            targets: '.boat-hull, .boat-mast, .boat-sail',
+            translateX: [0, 100],
+            translateY: [0, -10],
+            duration: 6000,
+            loop: true,
+            easing: 'linear'
+        });
+
+        anime({
+            targets: '.boat-sail',
+            d: [
+                { value: 'M200 180 Q230 200 220 250 H200 Z' },
+                { value: 'M200 180 Q240 210 230 250 H200 Z' }
+            ],
+            duration: 2000,
+            loop: true,
+            direction: 'alternate',
+            easing: 'easeInOutSine'
+        });
+
+        anime({
+            targets: '.sun',
+            translateY: [-5, 5],
+            duration: 3000,
+            loop: true,
+            direction: 'alternate',
+            easing: 'easeInOutSine'
+        });
+
+        anime({
+            targets: '.cloud',
+            translateX: [0, 20],
+            duration: 4000,
+            loop: true,
+            direction: 'alternate',
+            easing: 'linear'
+        });
+    </script>
+</body>
+</html>
+
+[A cat] {SVG path for cat body: "M300 280 Q310 260 320 280 L340 280 Q350 260 360 280 L370 280 Q380 270 380 280 L380 300 L300 300 Z", fill: #FFA500, class: "cat"} with [spots] {two circles with class "cat-spots" at (320,290) and (350,285) with radii 5 and 7, fill: #8B4513} and [bright eyes] {two white circles with class "cat-eye" at (310,275) and (330,275) with radius 5, and black pupils with class "cat-pupil" at same coordinates with radius 2} is [walking] {animation: translateX from -50 to 50, duration: 4000ms, easing: 'easeInOutSine', looping} near [a butterfly] {SVG path with class "butterfly": "M200 150 Q220 130 240 150 Q220 170 200 150 M200 150 Q180 130 160 150 Q180 170 200 150", fill: #FFFF00} [fluttering] {animation: translateY from -20 to 20, rotate from -10 to 10 degrees, duration: 2000ms, easing: 'easeInOutQuad', looping} above [the grass] {rectangle with class "grass" at (0,300) with width 400 and height 100, fill: #4CAF50} in [the yard] {implied by the presence of grass and house} of [a colorful house] {SVG path with class "house": "M50 200 L150 100 L250 200 L250 300 L50 300 Z", fill: #FF69B4, animation: scale from 1 to 1.02 over 2000ms, easing: 'easeInOutQuad', alternating direction, looping} with [large windows] {two rectangles with class "window" at (80,220) and (180,220), each 40x40, fill: #ADD8E6} against [a blue sky] {background-color: #87CEEB set on the body} .
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cat and Butterfly Animation</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #87CEEB;
+        }
+        #animation-container {
+            width: 400px;
+            height: 400px;
+            position: relative;
+            overflow: hidden;
+        }
+        .grass { fill: #4CAF50; }
+        .house { fill: #FF69B4; }
+        .window { fill: #ADD8E6; }
+        .cat { fill: #FFA500; }
+        .cat-spots { fill: #8B4513; }
+        .cat-eye { fill: #FFFFFF; }
+        .cat-pupil { fill: #000000; }
+        .butterfly { fill: #FFFF00; }
+    </style>
+</head>
+<body>
+    <div id="animation-container">
+        <svg width="100%" height="100%" viewBox="0 0 400 400">
+            <rect class="grass" x="0" y="300" width="400" height="100" />
+            <path class="house" d="M50 200 L150 100 L250 200 L250 300 L50 300 Z" />
+            <rect class="window" x="80" y="220" width="40" height="40" />
+            <rect class="window" x="180" y="220" width="40" height="40" />
+            <g class="cat-group">
+                <path class="cat" d="M300 280 Q310 260 320 280 L340 280 Q350 260 360 280 L370 280 Q380 270 380 280 L380 300 L300 300 Z" />
+                <circle class="cat-spots" cx="320" cy="290" r="5" />
+                <circle class="cat-spots" cx="350" cy="285" r="7" />
+                <circle class="cat-eye" cx="310" cy="275" r="5" />
+                <circle class="cat-eye" cx="330" cy="275" r="5" />
+                <circle class="cat-pupil" cx="310" cy="275" r="2" />
+                <circle class="cat-pupil" cx="330" cy="275" r="2" />
+            </g>
+            <path class="butterfly" d="M200 150 Q220 130 240 150 Q220 170 200 150 M200 150 Q180 130 160 150 Q180 170 200 150" />
+        </svg>
+    </div>
+
+    <script>
+        anime({
+            targets: '.cat-group',
+            translateX: [-50, 50],
+            duration: 4000,
+            easing: 'easeInOutSine',
+            loop: true
+        });
+
+        anime({
+            targets: '.butterfly',
+            translateY: [-20, 20],
+            rotate: [-10, 10],
+            duration: 2000,
+            easing: 'easeInOutQuad',
+            loop: true
+        });
+
+        anime({
+            targets: '.house',
+            scale: [1, 1.02],
+            duration: 2000,
+            easing: 'easeInOutQuad',
+            direction: 'alternate',
+            loop: true
+        });
+    </script>
+</body>
+</html>
