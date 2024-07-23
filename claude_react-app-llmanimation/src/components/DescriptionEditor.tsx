@@ -11,7 +11,7 @@ import axios from 'axios';
 const API_KEY = '??';
 // const anthropic = new Anthropic({ apiKey: '' });
 
-const ngrok_url = 'https://ba20-35-237-152-20.ngrok-free.app';
+const ngrok_url = 'https://5c75-34-44-206-208.ngrok-free.app';
 const ngrok_url_sonnet = ngrok_url+'/api/message';
 const ngrok_url_haiku = ngrok_url+'/api/message-haiku';
 
@@ -682,48 +682,61 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
   };
   
   const handleTabPress = (value: string) => {
+    // if (!currentVersionId) return;
+    // const extractText = (node: ChildNode): string => {
+    //   if (node.nodeType === Node.TEXT_NODE) {
+    //     return node.textContent || '';
+    //   } else if (node.nodeType === Node.ELEMENT_NODE) {
+    //     const element = node as HTMLElement;
+    //     const word = element.getAttribute('data-word');
+    //     if (word) {
+    //       const detailsElement = element.querySelector('span[style="color: orange;"]');
+    //       const details = detailsElement ? detailsElement.textContent : '';
+    //       return `[${word}]${details ? ` {${details}}` : ''}`;
+    //     }
+    //     return Array.from(node.childNodes).map(extractText).join('');
+    //   }
+    //   return '';
+    // };
+  
+    // const doc = new DOMParser().parseFromString(value, 'text/html');
+    // let text = Array.from(doc.body.childNodes)
+    //   .map(extractText)
+    //   .join('')
+    //   .replace(/\s+/g, ' ')
+    //   .replace('\n', ' ')
+    //   .replace('] {', ']{').replace(']\n{', ']{')
+    //   .trim();
+  
+    // setVersions(prevVersions => {
+    //   const updatedVersions = prevVersions.map(version =>
+    //     version.id === currentVersionId
+    //       ? {
+    //           ...version,
+    //           description: text.replace('] {', ']{').replace(']\n{', ']{'),
+    //         }
+    //       : version
+    //   );
+    //   return updatedVersions;
+    // });
+    // onApply(text.replace('] {', ']{').replace(']\n{', ']{'));
     if (!currentVersionId) return;
-    const extractText = (node: ChildNode): string => {
-      if (node.nodeType === Node.TEXT_NODE) {
-        return node.textContent || '';
-      } else if (node.nodeType === Node.ELEMENT_NODE) {
-        const element = node as HTMLElement;
-        const word = element.getAttribute('data-word');
-        if (word) {
-          const detailsElement = element.querySelector('span[style="color: orange;"]');
-          const details = detailsElement ? detailsElement.textContent : '';
-          return `[${word}]${details ? ` {${details}}` : ''}`;
-        }
-        return Array.from(node.childNodes).map(extractText).join('');
-      }
-      return '';
-    };
-  
-    const doc = new DOMParser().parseFromString(value, 'text/html');
-    let text = Array.from(doc.body.childNodes)
-      .map(extractText)
-      .join('')
-      .replace(/\s+/g, ' ')
-      .replace('\n', ' ')
-      .replace('] {', ']{').replace(']\n{', ']{')
-      .trim();
-  
     setVersions(prevVersions => {
       const updatedVersions = prevVersions.map(version =>
         version.id === currentVersionId
           ? {
               ...version,
-              description: text.replace('] {', ']{').replace(']\n{', ']{'),
+              description: version.latestDescriptionText.replace('] {', ']{').replace(']\n{', ']{'),
             }
           : version
       );
       return updatedVersions;
     });
-    onApply(text.replace('] {', ']{').replace(']\n{', ']{'));
   };
   
   const handleDoubleClick = (word: string) => {
     const processedWord = unpluralize(uncapitalize(word.trim()));
+    console.log('double click', processedWord)
     onWordSelected(processedWord);
   };
   
