@@ -5,13 +5,6 @@ import rehypePrism from 'rehype-prism-plus';
 import rehypeRewrite from 'rehype-rewrite';
 import { Version, KeywordTree, KeywordNode } from '../types';
 import axios from 'axios';
-//how code highlight work:
-// whenever the description is updated, the corresponding keyword tree will be updated for this version, to capture all the keywords
-// when we click parse or update a code, processKeywordTree() will be called
-// processKeywordTree() will segment code from GPT, then add code blocks for each keyword in keyword tree for this version
-// then it will call updateHighlightPieces(), accroding to which word is selected, to update two code lists to highlight: piecesToHighlightLevel1 and piecesToHighlightLevel2 for this specific version
-// the piecesToHighlightLevel1 and piecesToHighlightLevel2 will tell exactly which lines of code to highlight, they will be refered when the code is rendered
-// when rendering the code, is a line of code is in pieces to highlight, also +-5 lines of code near it would contain the selected word, then highlight it
 
 interface CodeEditorProps {
   code: { html: string; css: string; js: string };
@@ -22,7 +15,7 @@ interface CodeEditorProps {
   wordselected: string;
   currentVersionId: string | null;
   setVersions: React.Dispatch<React.SetStateAction<Version[]>>;
-  versions: Version[]; // Add versions to the props;
+  versions: Version[];
   extractKeywords: (description: string) => KeywordTree[];
 }
 
@@ -40,13 +33,14 @@ const CustomCodeEditor: React.FC<CodeEditorProps> = ({
   wordselected,
   currentVersionId,
   setVersions,
-  versions, // Receive versions as a prop
+  versions,
   extractKeywords
 }) => {
   const [html, setHtml] = useState(code.html);
   const [css, setCss] = useState(code.css);
   const [js, setJs] = useState(code.js);
   const [activeTab, setActiveTab] = useState('html');
+  const [hoveredElement, setHoveredElement] = useState<{ keyword: string, basicPrompt: string } | null>(null);
   const editorRef = useRef<HTMLTextAreaElement | null>(null);
 
   const version = currentVersionId !== null ? versions.find(version => version.id === currentVersionId) : null;
@@ -67,7 +61,6 @@ const CustomCodeEditor: React.FC<CodeEditorProps> = ({
     }
   }, [keywordTree, wordselected, highlightEnabled, currentVersionId]);
 
-  //save the last state of current version when it updates
   const saveVersionToHistory = (currentVersionId: string) => {
     setVersions(prevVersions => {
       const updatedVersions = prevVersions.map(version => {
@@ -92,7 +85,7 @@ const CustomCodeEditor: React.FC<CodeEditorProps> = ({
 
   const updateHighlightPieces = (versionId: string | null) => {
     if (!versionId) return;
-    
+
     const level1Pieces: string[] = [];
     const level2Pieces: string[] = [];
 
@@ -118,7 +111,6 @@ const CustomCodeEditor: React.FC<CodeEditorProps> = ({
     });
   };
 
-  //called when new code is generated
   const processKeywordTree = async (versionId: string | null) => {
     if (!versionId) return;
 
@@ -156,7 +148,7 @@ const CustomCodeEditor: React.FC<CodeEditorProps> = ({
             }
           });
         }
-  
+
         if (tree.level === 2) {
           sublists.forEach(sublist => {
             sublist.forEach(subpiece => {
@@ -168,12 +160,12 @@ const CustomCodeEditor: React.FC<CodeEditorProps> = ({
         }
       });
     });
-    //update tree first
+
     setVersions((prevVersions) => {
-      const updatedVersions = prevVersions.map(version => 
-        version.id === versionId 
-          ? { 
-              ...version, 
+      const updatedVersions = prevVersions.map(version =>
+        version.id === versionId
+          ? {
+              ...version,
               keywordTree: updatedKeywordTree
             }
           : version
@@ -182,7 +174,6 @@ const CustomCodeEditor: React.FC<CodeEditorProps> = ({
     });
 
     updateHighlightPieces(versionId);
-
   };
 
   const ParseCodeGPTCall = async (versionId: string): Promise<string> => {
@@ -285,20 +276,6 @@ const CustomCodeEditor: React.FC<CodeEditorProps> = ({
     `;
 
     try {
-      // const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      //   method: "POST",
-      //   headers: {
-      //     "Authorization": `Bearer ${API_KEY}`,
-      //     "Content-Type": "application/json",
-      //   },
-      //   body: JSON.stringify({
-      //     model: "gpt-4-turbo",
-      //     messages: [{ role: "system", content: "You are a creative programmer." }, { role: "user", content: prompt }],
-      //   }),
-      // });
-
-      // const data = await response.json();
-      // const gptResponse = data.choices[0]?.message?.content;
       const response = await axios.post(ngrok_url_sonnet, {
         method: 'POST',
         headers: {
@@ -306,7 +283,7 @@ const CustomCodeEditor: React.FC<CodeEditorProps> = ({
         },
         body: JSON.stringify({ prompt: prompt })
       });
-  
+
       const data = await response.data;
       const content = data?.content;
       console.log('content from Parsecode:', content);
@@ -337,7 +314,7 @@ const CustomCodeEditor: React.FC<CodeEditorProps> = ({
           : version
       );
       return updatedVersions;
-    });  
+    });
 
     setVersions((prevVersions) => {
       const updatedVersions = prevVersions.map(version =>
@@ -362,22 +339,6 @@ const CustomCodeEditor: React.FC<CodeEditorProps> = ({
     Include only the updated description in the response.`;
 
     try {
-      // const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      //   method: "POST",
-      //   headers: {
-      //     "Authorization": `Bearer ${API_KEY}`,
-      //     "Content-Type": "application/json",
-      //   },
-      //   body: JSON.stringify({
-      //     model: "gpt-4-turbo",
-      //     messages: [{ role: "system", content: "You are a creative programmer." }, { role: "user", content: prompt }],
-      //   }),
-        
-      // });
-
-      // const data = await response.json();
-      // const newDescriptionContent = data.choices[0]?.message?.content;
-      // console.log('prompt for update code:', prompt)
       const response = await axios.post(ngrok_url_sonnet, {
         method: 'POST',
         headers: {
@@ -385,7 +346,7 @@ const CustomCodeEditor: React.FC<CodeEditorProps> = ({
         },
         body: JSON.stringify({ prompt: prompt })
       });
-  
+
       const data = await response.data;
       const content = data?.content;
       console.log('content from updatecode:', content);
@@ -393,13 +354,13 @@ const CustomCodeEditor: React.FC<CodeEditorProps> = ({
       if (content) {
         const updatedDescription = content.replace('] {', ']{').replace(']\n{', ']{');
         setVersions((prevVersions) => {
-          const updatedVersions = prevVersions.map(version => 
-            version.id === versionId 
-              ? { 
-                  ...version, 
+          const updatedVersions = prevVersions.map(version =>
+            version.id === versionId
+              ? {
+                  ...version,
                   description: updatedDescription,
-                  savedOldDescription: updatedDescription,  
-                  keywordTree: extractKeywords(updatedDescription) 
+                  savedOldDescription: updatedDescription,
+                  keywordTree: extractKeywords(updatedDescription)
                 }
               : version
           );
@@ -435,7 +396,7 @@ const CustomCodeEditor: React.FC<CodeEditorProps> = ({
   };
 
   const shouldHighlightLine = (nodeText: string, index: number, codeLines: string[]) => {
-    const regex = /[^{}()@#\s$]/; 
+    const regex = /[^{}()@#\s$]/;
     const isMeaningfulText = (text: string) => regex.test(text);
 
     if (!isMeaningfulText(nodeText)) {
@@ -500,13 +461,28 @@ const CustomCodeEditor: React.FC<CodeEditorProps> = ({
                     if (highlightEnabled) {
                       highlightCodeLines(node, piecesToHighlightLevel1, piecesToHighlightLevel2, codeLines, index);
                     }
+
+                    // Add hover logic
+                    if (node.properties?.className?.includes('keyword')) {
+                      node.properties.onMouseEnter = () => {
+                        const keywordText = getFullText(node).trim();
+                        // Check if the keyword matches a Generate object
+                        const generateObject = versions.find(version => version.id === currentVersionId)?.generateObjects.find(obj => obj.keyword === keywordText);
+                        if (generateObject) {
+                          setHoveredElement({ keyword: keywordText, basicPrompt: generateObject.basicPrompt });
+                        }
+                      };
+                      node.properties.onMouseLeave = () => {
+                        setHoveredElement(null);
+                      };
+                    }
                   }
                 }
               }
             ] as any
           ]}
           style={{
-            fontSize: 12,
+            fontSize: 15,
             backgroundColor: '#f5f5f5',
             fontFamily: 'ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace',
           }}
@@ -558,8 +534,8 @@ const CustomCodeEditor: React.FC<CodeEditorProps> = ({
         <button className="blue-button" onClick={() => handleRun(currentVersionId || '')}>Run</button>
         <button className="blue-button" onClick={() => handleParseRun(currentVersionId || '')}>Parse and Run</button>
         <button className="purple-button" onClick={() => handleUpdateCode(currentVersionId || '')}>Update Code</button>
-        <button 
-          className="green-button" 
+        <button
+          className="green-button"
           onClick={() => setVersions(prevVersions => {
             const updatedVersions = prevVersions.map(version =>
               version.id === currentVersionId
@@ -572,6 +548,14 @@ const CustomCodeEditor: React.FC<CodeEditorProps> = ({
           {highlightEnabled ? 'Disable Highlight' : 'Enable Highlight'}
         </button>
       </div>
+      {hoveredElement && (
+        <div className="hovered-element">
+          <p>{hoveredElement.basicPrompt}</p>
+          <button>^</button>
+          <button>r</button>
+          <button>v</button>
+        </div>
+      )}
     </div>
   );
 };

@@ -19,7 +19,17 @@ const App: React.FC = () => {
       id: 'init',
       description: "Adding sth...",
       savedOldDescription: '', 
-      code: { html: '', css: '', js: '' },
+      code: { html: '', css: '', js: `// Initialize Fabric.js canvas
+const canvas = new fabric.Canvas('c', {
+    backgroundColor: '#DBB4B4'
+});
+
+canvas.setHeight(600);
+canvas.setWidth(600);
+
+// Example usage
+const myObject = new Generate('house');
+myObject.detail('small house, with a rgb(180,160,122) roof and blue walls');` },
       savedOldCode: { html: '', css: '', js: '' },
       keywordTree: [
         { level: 1, keywords: [] },
